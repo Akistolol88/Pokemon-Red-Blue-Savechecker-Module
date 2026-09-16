@@ -1,0 +1,16 @@
+plugins {
+    id 'lnu.java-conventions'
+    id 'lnu.quality-conventions'
+    id 'lnu.testing-conventions'
+
+    id 'java-library'
+}
+
+group = 'se.lnu.savechecker'
+version = '1.0.0'
+
+dependencies {
+    testImplementation libs.junit.jupiter.api
+    testRuntimeOnly libs.junit.jupiter.engine
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+}

@@ -17,7 +17,7 @@ dependencyResolutionManagement {
 
 rootProject.name = 'java-gradle-cli-template'
 
-include("app")
+include("app", "savechecker")
 
 // Composite build: pulls in the custom build logic and convention plugins.
 includeBuild("build-logic")
