@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Gradle: Debug Application",
+      "request": "launch", // Changed to launch to let VS Code manage the lifecycle
+      "mainClass": "", // Left empty since Gradle's build.gradle dynamically defines this
+      "preLaunchTask": "Gradle: run (debug)",
+      "internalConsoleOptions": "neverOpen"
+    }
+  ]
+}

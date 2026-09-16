@@ -1,0 +1,7 @@
+* text=auto eol=lf
+
+# Windows batch scripts must keep CRLF line endings
+*.bat text eol=crlf
+
+# Binary files should be left untouched
+*.jar binary

@@ -1,0 +1,44 @@
+plugins {
+    id 'java'
+}
+
+// ==============================================================================
+// 1. JUnit 5 Platform Execution Framework
+// ==============================================================================
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+
+    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+
+    reports {
+        html.required = true
+        junitXml.required = true
+    }
+
+    testLogging {
+        events = ["passed", "skipped", "failed"]
+        exceptionFormat = "full"
+        showCauses = true
+        showExceptions = true
+        showStackTraces = true
+    }
+}
+
+// ==============================================================================
+// 2. Test Summary Reporting
+// ==============================================================================
+tasks.register("printTestSummary", lnu.PrintTestSummaryTask) {
+    description = "Prints a clean terminal summary from JUnit XML outputs. Purely informational — the test task itself is what fails the build."
+    group = "verification"
+
+    testResultsDir.set(layout.buildDirectory.dir("test-results/test"))
+    logFile.set(layout.buildDirectory.file("reports/test-summary.log"))
+
+    mustRunAfter(tasks.withType(Test))
+    outputs.upToDateWhen { false }
+}
+
+tasks.named('test') {
+    // finalizedBy runs the summary even when the test task itself fails.
+    finalizedBy('printTestSummary')
+}

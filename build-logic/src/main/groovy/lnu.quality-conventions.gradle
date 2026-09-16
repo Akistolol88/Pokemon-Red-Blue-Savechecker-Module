@@ -1,0 +1,120 @@
+plugins {
+    id 'checkstyle'
+    id 'pmd'
+}
+
+// ==============================================================================
+// 1. Checkstyle Quality Gate Configuration (Production Code Only)
+// ==============================================================================
+checkstyle {
+    toolVersion = libs.versions.checkstyle.get()
+    configFile = rootProject.file("config/checkstyle/checkstyle.xml")
+    
+    // Allows the custom summary gate aggregator to handle terminal reporting
+    ignoreFailures = true
+    showViolations = true
+}
+
+tasks.withType(Checkstyle).configureEach {
+    // Restricts analysis exclusively to production source sets (ignores tests)
+    source = sourceSets.main.allJava
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+// Strict Engineering Policy: Disable style analysis natively on test structures
+tasks.named('checkstyleTest').configure {
+    enabled = false
+    // Clear out output location paths to prevent artifact contamination from older local runs
+    reports.xml.outputLocation.set(rootProject.file("build/tmp/ignored-cs-test.xml"))
+}
+
+// ==============================================================================
+// 2. PMD Static Analysis Configuration (Production Code Only)
+// ==============================================================================
+pmd {
+    toolVersion = libs.versions.pmd.get()
+    ruleSetFiles = rootProject.files("config/pmd/ruleset.xml")
+    incrementalAnalysis = true
+    
+    // Allows the custom summary gate aggregator to handle terminal reporting
+    ignoreFailures = true
+}
+
+tasks.withType(Pmd).configureEach {
+    // Restricts analysis exclusively to production source sets (ignores tests)
+    source = sourceSets.main.allJava
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+// PMD's RuleSetFactory tolerates a broken ruleset (e.g. an unresolvable rule reference):
+// it logs an error to the console but still exits successfully with an empty report —
+// indistinguishable from "zero violations found" to anything only reading the report.
+// Checkstyle already fails hard on an invalid config (verified separately), so only PMD
+// needs this guard. Gradle's PMD task exposes no report-level signal for this, so the
+// console output itself is inspected for the known failure marker.
+tasks.withType(Pmd).configureEach {
+    def toolOutput = new StringBuilder()
+    def outputListener = { CharSequence output -> toolOutput << output } as StandardOutputListener
+    doFirst {
+        logging.addStandardOutputListener(outputListener)
+        logging.addStandardErrorListener(outputListener)
+    }
+    doLast {
+        logging.removeStandardOutputListener(outputListener)
+        logging.removeStandardErrorListener(outputListener)
+        if (toolOutput.toString().contains("Cannot load ruleset")) {
+            throw new GradleException(
+                "PMD failed to load its ruleset (config/pmd/ruleset.xml) — see the console "
+                    + "output above for details. This is a configuration error, not a code "
+                    + "violation, and must be fixed rather than ignored.")
+        }
+    }
+}
+
+// Strict Engineering Policy: Disable bug detection analysis natively on test structures
+tasks.named('pmdTest').configure {
+    enabled = false
+    // Clear out output location paths to prevent artifact contamination from older local runs
+    reports.xml.outputLocation.set(rootProject.file("build/tmp/ignored-pmd-test.xml"))
+}
+
+// ==============================================================================
+// 3. Automated Code Quality Reporting & Quality Gate Lifecycle
+// ==============================================================================
+tasks.register("printCodeQualitySummary", lnu.PrintCodeQualitySummaryTask) {
+    description = "Parses and aggregates static analysis data from Checkstyle and PMD into a unified Quality Gate."
+    group = "verification"
+
+    // Maps target paths lazily to maintain clean configuration tracking
+    checkstyleReportDir.set(layout.buildDirectory.dir("reports/checkstyle"))
+    pmdReportDir.set(layout.buildDirectory.dir("reports/pmd"))
+    mainSourceFiles.from(sourceSets.main.allJava)
+    logFile.set(layout.buildDirectory.file("reports/code-quality-summary.log"))
+
+    // Execution graph safeguard: ensures linter streams flush data before compilation scans
+    mustRunAfter(tasks.withType(Checkstyle), tasks.withType(Pmd))
+}
+
+// Hooks the custom gate reporting natively into the verification pipeline
+tasks.named('check').configure {
+    finalizedBy('printCodeQualitySummary')
+}
+
+// ==============================================================================
+// 4. Infrastructure Warm-Up: Prefetch Code Quality Binaries During Build Stage
+// ==============================================================================
+// Forces the central compilation gate to eagerly resolve and cache all 
+// downstream linter tools (Checkstyle/PMD) into the shared workspace artifact tree.
+tasks.named('compileJava') {
+    doFirst {
+        // Resolves and caches the underlying tool classpaths before compilation bytes hit the disk
+        configurations.checkstyle.resolve()
+        configurations.pmd.resolve()
+    }
+}

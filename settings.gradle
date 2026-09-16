@@ -1,0 +1,23 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
+dependencyResolutionManagement {
+    // Enforces centralized repository declaration; prevents subprojects from
+    // overriding or injecting unapproved third-party repositories.
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+
+    repositories {
+        mavenCentral()
+    }
+}
+
+rootProject.name = 'java-gradle-cli-template'
+
+include("app")
+
+// Composite build: pulls in the custom build logic and convention plugins.
+includeBuild("build-logic")

@@ -1,0 +1,9 @@
+plugins {
+    // Enables precompiled script plugins so we can write our conventions as .gradle files
+    id 'groovy-gradle-plugin'
+}
+
+repositories {
+    gradlePluginPortal()
+    mavenCentral()
+}

@@ -1,0 +1,22 @@
+plugins {
+    // Shared convention plugins for the Java toolchain, static analysis, and test lifecycle.
+    id 'lnu.java-conventions'
+    id 'lnu.quality-conventions'
+    id 'lnu.testing-conventions'
+
+    // Packages and runs the module as a CLI application.
+    id 'application'
+}
+
+group = 'se.lnu.cli'
+version = '1.0.0'
+
+application {
+    mainClass = 'se.lnu.cli.App'
+}
+
+dependencies {
+    testImplementation libs.junit.jupiter.api
+    testRuntimeOnly    libs.junit.jupiter.engine
+    testRuntimeOnly    "org.junit.platform:junit-platform-launcher"
+}

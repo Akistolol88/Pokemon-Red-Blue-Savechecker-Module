@@ -1,0 +1,40 @@
+plugins {
+    id 'java'
+}
+
+// ==============================================================================
+// 1. Java Toolchain Enforcement
+// ==============================================================================
+java {
+    toolchain {
+        // Enforces JDK 25 across all local and remote environments, decoupling the 
+        // build from the host machine's or CI runner's specific JVM. This guarantees 
+        // byte-code consistency, predictable runtime behavior, and smooth upgrades 
+        // across the entire engineering team.
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+// ==============================================================================
+// 2. Compiler Optimization and Code Hygiene
+// ==============================================================================
+tasks.withType(JavaCompile).configureEach {
+    // Standardizes character encoding to eliminate platform-specific discrepancies.
+    // Prevents compilation breakages when developers collaborate across different 
+    // Operating Systems (Windows, macOS, Linux) or when processed by headless CI agents.
+    options.encoding = 'UTF-8'
+    
+    // Core compiler linting baseline with strict warning suppressions 
+    // to keep the compilation feedback loop highly actionable for students.
+    options.compilerArgs << '-Xlint:all' << '-Xlint:-processing' << '-Xlint:-this-escape'
+}
+
+// ==============================================================================
+// 3. Runtime Lifecycle Architecture (Decouple Verification From Builds)
+// ==============================================================================
+tasks.named('build') {
+    // Overwrite the execution chain to strictly handle compilation and packaging.
+    // This permanently decouples 'check' and 'test' from the standard build lifecyle,
+    // safe-guarding it against Gradle 9+ mutation restrictions.
+    setDependsOn([tasks.named('classes'), tasks.named('jar')])
+}

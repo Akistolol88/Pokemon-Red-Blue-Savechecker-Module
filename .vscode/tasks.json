@@ -1,0 +1,157 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    // ==============================================================================
+    // 1. APPLICATION EXECUTION (RUNNERS)
+    // ==============================================================================
+    {
+      "label": "Gradle: run",
+      "type": "shell",
+      "command": "./gradlew",
+      "args": [
+        "run",
+        "-q",
+        "--console=plain"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Gradle: run (debug)",
+      "type": "shell",
+      "command": "./gradlew",
+      "args": [
+        "run",
+        "--debug-jvm",
+        "--console=plain"
+      ],
+      "group": "build",
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true,
+        "focus": true
+      },
+      "problemMatcher": [
+        {
+          "pattern": [
+            {
+              "regexp": "\\b\\B",
+              "file": 1,
+              "location": 2,
+              "message": 3
+            }
+          ],
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": "^.*",
+            "endsPattern": "Listening for transport dt_socket at address: 5005"
+          }
+        }
+      ]
+    },
+    // ==============================================================================
+    // 2. ARTIFACT MANAGEMENT (COMPILATION & WORKSPACE CLEANING)
+    // ==============================================================================
+    {
+      "label": "Gradle: build",
+      "type": "shell",
+      "command": "./gradlew",
+      "args": [
+        "build",
+        "--console=plain"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Gradle: clean",
+      "type": "shell",
+      "command": "./gradlew",
+      "args": [
+        "clean",
+        "--console=plain"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    // ==============================================================================
+    // 3. VERIFICATION (CODE QUALITY & TESTS)
+    // ==============================================================================
+    {
+      "label": "Gradle: check",
+      "type": "shell",
+      "command": "./gradlew",
+      "args": [
+        "check",
+        "--console=plain"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Gradle: test",
+      "type": "shell",
+      "command": "./gradlew",
+      "args": [
+        "test",
+        "--console=plain"
+      ],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    // ==============================================================================
+    // 4. CODE QUALITY SUMMARY
+    // ==============================================================================
+    {
+      "label": "Gradle: code quality summary",
+      "type": "shell",
+      "command": "./gradlew",
+      "args": [
+        "checkstyleMain",
+        "pmdMain",
+        "printCodeQualitySummary",
+        "--console=plain"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
+    }
+  ]
+}
