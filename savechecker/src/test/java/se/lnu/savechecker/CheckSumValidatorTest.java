@@ -9,7 +9,7 @@ import java.util.Arrays;
 
 class CheckSumValidatorTest {
 
-    private static final int FIRST_CHECKSUMMED_BYTE = 0x2598
+    private static final int FIRST_CHECKSUMMED_BYTE = 0x2598;
 
     @Test
     void isValidPokemonGen1Save() throws Exception {
