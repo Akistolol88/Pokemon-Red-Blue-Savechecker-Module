@@ -8,6 +8,9 @@ import java.nio.file.Path;
 import java.util.Arrays;
 
 class CheckSumValidatorTest {
+
+    private static final int FIRST_CHECKSUMMED_BYTE = 0x2598
+
     @Test
     void isValidPokemonGen1Save() throws Exception {
         Path saveFile = Path.of(getClass().getResource("/saves/Red/Pokemon Red (UE) [S][!].sav").toURI());
@@ -19,7 +22,7 @@ class CheckSumValidatorTest {
         Path saveFile = Path.of(getClass().getResource("/saves/Yellow/Yellow_Random_01.srm").toURI());
         byte[] data = Files.readAllBytes(saveFile);
         byte[] copyData = Arrays.copyOf(data, data.length);
-        copyData[0x2598] = 96;
+        copyData[FIRST_CHECKSUMMED_BYTE] = 96;
         assertFalse(CheckSumValidator.isValid(copyData));
     }
 }
