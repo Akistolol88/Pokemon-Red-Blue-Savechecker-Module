@@ -19,11 +19,15 @@ class SaveFileValidator {
      * Validates the given save file bytes, throwing if they are invalid.
      *
      * @param data the raw bytes to validate
-     * @throws InvalidSaveFileException if {@code data} is not
+     * @throws InvalidSaveFileException if {@code data} is {@code null}, is not
      *     {@value #EXPECTED_SAVE_SIZE_BYTES} bytes long, or its stored
      *     checksum does not match one recomputed from its contents
      */
     static void validate(byte[] data) throws InvalidSaveFileException {
+        // Checked first: reading data.length on null would crash with a NullPointerException.
+        if (data == null) {
+            throw new InvalidSaveFileException("No save data given (data was null)");
+        }
         if (data.length != EXPECTED_SAVE_SIZE_BYTES) {
             throw new InvalidSaveFileException("Expected " + EXPECTED_SAVE_SIZE_BYTES
                 + " bytes but got " + data.length + " bytes. \nNot a valid Pokemon Generation 1 savefile.");

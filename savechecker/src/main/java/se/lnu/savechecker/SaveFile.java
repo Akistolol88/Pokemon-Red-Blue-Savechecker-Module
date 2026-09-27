@@ -18,8 +18,8 @@ public class SaveFile {
      * Reads and validates the raw bytes of a Generation I save file.
      *
      * @param data the raw bytes of the save file, exactly as read from disk
-     * @throws InvalidSaveFileException if the data is the wrong size, or its
-     *     stored checksum does not match its actual contents
+     * @throws InvalidSaveFileException if the data is {@code null}, the wrong
+     *     size, or its stored checksum does not match its actual contents
      */
     public SaveFile(byte[] data) throws InvalidSaveFileException {
         SaveFileValidator.validate(data);

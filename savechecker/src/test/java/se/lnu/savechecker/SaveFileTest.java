@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.Arrays;
 class SaveFileTest {
 
     private static final int STORED_CHECKSUM_BYTE = 0x3523;
+    private static final int EXPECTED_SAVE_SIZE = 32_768;
 
     @Test
     void rejectsWrongSize() {
@@ -40,5 +42,62 @@ class SaveFileTest {
         assertThrows(InvalidSaveFileException.class, () -> {
             new SaveFile(copyData);
         });
+    }
+
+    @Test
+    void rejectsNullData() {
+        assertThrows(InvalidSaveFileException.class, () -> {
+            new SaveFile(null);
+        });
+    }
+
+    @Test
+    void rejectsEmptyData() {
+        assertThrows(InvalidSaveFileException.class, () -> {
+            new SaveFile(new byte[0]);
+        });
+    }
+
+    @Test
+    void rejectsOneByteTooShort() {
+        // Edge case: just below the exact size must fail.
+        assertThrows(InvalidSaveFileException.class, () -> {
+            new SaveFile(new byte[EXPECTED_SAVE_SIZE - 1]);
+        });
+    }
+
+    @Test
+    void rejectsOneByteTooLong() {
+        // Edge case: just above the exact size must fail too.
+        assertThrows(InvalidSaveFileException.class, () -> {
+            new SaveFile(new byte[EXPECTED_SAVE_SIZE + 1]);
+        });
+    }
+
+    @Test
+    void rejectsCorrectSizeButAllZeros() {
+        // Right size, but not a real save: an all-zero sum gives checksum 0xFF, not the stored 0x00.
+        assertThrows(InvalidSaveFileException.class, () -> {
+            new SaveFile(new byte[EXPECTED_SAVE_SIZE]);
+        });
+    }
+
+    @Test
+    void wrongSizeMessageShowsActualSize() {
+        InvalidSaveFileException exception = assertThrows(InvalidSaveFileException.class, () -> {
+            new SaveFile(new byte[100]);
+        });
+        assertTrue(exception.getMessage().contains("100"), exception.getMessage());
+    }
+
+    @Test
+    void checksumMismatchMessageNamesChecksum() throws Exception {
+        // Same size as a real save, so the message must blame the checksum, not the size.
+        byte[] data = SaveFixtures.load("/saves/Yellow/Yellow_Random_01.srm");
+        data[STORED_CHECKSUM_BYTE] = (byte) (data[STORED_CHECKSUM_BYTE] + 1);
+        InvalidSaveFileException exception = assertThrows(InvalidSaveFileException.class, () -> {
+            new SaveFile(data);
+        });
+        assertTrue(exception.getMessage().contains("Checksum"), exception.getMessage());
     }
 }
