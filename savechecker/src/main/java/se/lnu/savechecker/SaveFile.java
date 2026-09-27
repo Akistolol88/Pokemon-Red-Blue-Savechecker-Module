@@ -14,6 +14,9 @@ public class SaveFile {
     /** The player's name and badges, read from this save. */
     private final Trainer trainer;
 
+    /** Which Pokémon the player has seen and caught, read from this save. */
+    private final PokedexStatus pokedexStatus;
+
     /**
      * Reads and validates the raw bytes of a Generation I save file.
      *
@@ -24,7 +27,8 @@ public class SaveFile {
     public SaveFile(byte[] data) throws InvalidSaveFileException {
         SaveFileValidator.validate(data);
 
-        trainer = new Trainer(data);
+        this.trainer = new Trainer(data);
+        this.pokedexStatus = new PokedexStatus(data);
     }
 
     /**
@@ -35,5 +39,15 @@ public class SaveFile {
      */
     public Trainer getTrainer() {
         return this.trainer;
+    }
+
+    /**
+     * Returns the Pokédex progress stored in this save: which Pokémon the
+     * player has seen and which they have caught.
+     *
+     * @return the Pokédex status from this save
+     */
+    public PokedexStatus getPokedexStatus() {
+        return this.pokedexStatus;
     }
 }
