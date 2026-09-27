@@ -43,14 +43,14 @@ public final class Trainer {
      * @param data the full save file, already checked by {@link SaveFileValidator}
      */
     Trainer(byte[] data) {
-        name = TextDecoder.decode(data, NAME_OFFSET, NAME_MAX_BYTES);
+        this.name = TextDecoder.decode(data, NAME_OFFSET, NAME_MAX_BYTES);
 
-        badges = EnumSet.noneOf(Badge.class);
+        this.badges = EnumSet.noneOf(Badge.class);
         int badgeByte = data[BADGE_OFFSET] & 0xFF;
 
         for (Badge badge : Badge.values()) {
             if (((badgeByte >> badge.ordinal()) & 1) == 1) {
-                badges.add(badge);
+                this.badges.add(badge);
             }
         }
     }
