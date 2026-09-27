@@ -62,7 +62,7 @@ public final class Trainer {
      * @return {@code true} if the trainer has that badge
      */
     public boolean hasBadge(Badge badge) {
-        return badges.contains(badge);
+        return this.badges.contains(badge);
     }
 
     /**
@@ -72,7 +72,7 @@ public final class Trainer {
      * @return the earned badges, empty if the trainer has none
      */
     public Set<Badge> getBadges() {
-        return Collections.unmodifiableSet(badges);
+        return Collections.unmodifiableSet(this.badges);
     }
 
     /**
@@ -81,7 +81,7 @@ public final class Trainer {
      * @return the trainer's name
      */
     public String getName() {
-        return name;
+        return this.name;
     }
 
 }

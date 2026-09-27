@@ -11,6 +11,9 @@ package se.lnu.savechecker;
  */
 public class SaveFile {
 
+    /** The player's name and badges, read from this save. */
+    private final Trainer trainer;
+
     /**
      * Reads and validates the raw bytes of a Generation I save file.
      *
@@ -20,6 +23,17 @@ public class SaveFile {
      */
     public SaveFile(byte[] data) throws InvalidSaveFileException {
         SaveFileValidator.validate(data);
-        // TODO: parse trainer/party/pokedex
+
+        trainer = new Trainer(data);
+    }
+
+    /**
+     * Returns the trainer info stored in this save: the player's name and
+     * which gym badges they have earned.
+     *
+     * @return the trainer from this save
+     */
+    public Trainer getTrainer() {
+        return this.trainer;
     }
 }
