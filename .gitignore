@@ -264,3 +264,6 @@ gradle-app.setting
 
 # Custom
 !.vscode/java.prefs
+
+# VS Code Java extension (Eclipse) build output
+bin/
