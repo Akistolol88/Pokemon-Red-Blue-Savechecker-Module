@@ -2,6 +2,7 @@ package se.lnu.savechecker;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.file.Files;
@@ -30,6 +31,64 @@ class PartyTest {
     @Test
     void readsRedFirstPokemonLevel() throws Exception {
         assertEquals(20, loadParty(RED_SAVE).getPokemon().get(0).getLevel());
+    }
+
+    @Test
+    void readsRedSecondPokemonOriginalTrainerId() throws Exception {
+        assertEquals(48035, loadParty(RED_SAVE).getPokemon().get(1).getOriginalTrainerId());
+    }
+
+    @Test
+    void readsRedFirstPokemonAttack() throws Exception {
+        assertEquals(29, loadParty(RED_SAVE).getPokemon().get(0).getAttack());
+    }
+
+    @Test
+    void readsTradedPokemonOriginalTrainerId() throws Exception {
+        // Red's Eevee was traded in, so it carries another player's ID, not the save owner's.
+        List<PartyPokemon> pokemon = loadParty(RED_SAVE).getPokemon();
+        assertEquals(46116, pokemon.get(0).getOriginalTrainerId());
+        assertNotEquals(pokemon.get(1).getOriginalTrainerId(), pokemon.get(0).getOriginalTrainerId());
+    }
+
+    @Test
+    void readsRedFirstPokemonStats() throws Exception {
+        PartyPokemon eevee = loadParty(RED_SAVE).getPokemon().get(0);
+        assertEquals(27, eevee.getDefense());
+        assertEquals(27, eevee.getSpeed());
+        assertEquals(35, eevee.getSpecial());
+    }
+
+    @Test
+    void readsRedSecondPokemonStats() throws Exception {
+        PartyPokemon squirtle = loadParty(RED_SAVE).getPokemon().get(1);
+        assertEquals(11, squirtle.getAttack());
+        assertEquals(14, squirtle.getDefense());
+        assertEquals(11, squirtle.getSpeed());
+        assertEquals(11, squirtle.getSpecial());
+    }
+
+    @Test
+    void readsYellowFirstPokemonStats() throws Exception {
+        // Stats above 99 check that both bytes of each two-byte value are combined.
+        PartyPokemon alakazam = loadParty(YELLOW_SAVE).getPokemon().get(0);
+        assertEquals(27315, alakazam.getOriginalTrainerId());
+        assertEquals(62, alakazam.getAttack());
+        assertEquals(67, alakazam.getDefense());
+        assertEquals(133, alakazam.getSpeed());
+        assertEquals(142, alakazam.getSpecial());
+    }
+
+    @Test
+    void readsHighOriginalTrainerId() throws Exception {
+        // 65453 is close to the two-byte maximum (65535), so the high byte is above 127
+        // and would come out negative without the & 0xFF mask.
+        PartyPokemon onlyPokemon = loadParty(RANDOMIZER_SAVE_2).getPokemon().get(0);
+        assertEquals(65453, onlyPokemon.getOriginalTrainerId());
+        assertEquals(8, onlyPokemon.getAttack());
+        assertEquals(13, onlyPokemon.getDefense());
+        assertEquals(9, onlyPokemon.getSpeed());
+        assertEquals(9, onlyPokemon.getSpecial());
     }
 
     @Test

@@ -9,23 +9,38 @@ public final class PartyPokemon {
     private static final int NICKNAME_OFFSET = 0x307E;
     private static final int NAME_MAX_BYTES = 11;
 
+    private static final int LEVEL_OFFSET = 33;
     private static final int CURRENT_HP_OFFSET = 1;
     private static final int MAX_HP_OFFSET = 34;
-    private static final int LEVEL_OFFSET = 33;
+    private static final int ATTACK_OFFSET = 36;
+    private static final int DEFENSE_OFFSET = 38;
+    private static final int SPEED_OFFSET = 40;
+    private static final int SPECIAL_OFFSET = 42;
+    private static final int OT_ID_OFFSET = 12;
 
     private final String nickname;
     private final int level;
     private final int currentHp;
     private final int maxHp;
+    private final int originalTrainerId;
+    private final int attack;
+    private final int defense;
+    private final int speed;
+    private final int special;
 
     PartyPokemon(byte[] data, int slot) {
         int start = PARTY_DATA_OFFSET + (slot * POKEMON_SIZE_BYTES);
         int nicknameStart = NICKNAME_OFFSET + (slot * NAME_MAX_BYTES);
 
-        this.currentHp = readTwoBytes(data, start + CURRENT_HP_OFFSET);
-        this.level = data[start + LEVEL_OFFSET] & 0xFF;
-        this.maxHp = readTwoBytes(data, start + MAX_HP_OFFSET);
         this.nickname = TextDecoder.decode(data, nicknameStart, NAME_MAX_BYTES);
+        this.level = data[start + LEVEL_OFFSET] & 0xFF;
+        this.currentHp = readTwoBytes(data, start + CURRENT_HP_OFFSET);
+        this.maxHp = readTwoBytes(data, start + MAX_HP_OFFSET);
+        this.originalTrainerId = readTwoBytes(data, start + OT_ID_OFFSET);
+        this.attack = readTwoBytes(data, start + ATTACK_OFFSET);
+        this.defense = readTwoBytes(data, start + DEFENSE_OFFSET);
+        this.speed = readTwoBytes(data, start + SPEED_OFFSET);
+        this.special = readTwoBytes(data, start + SPECIAL_OFFSET);
     }
 
     /**
@@ -64,6 +79,26 @@ public final class PartyPokemon {
      */
     public int getMaxHp() {
         return this.maxHp;
+    }
+
+    public int getOriginalTrainerId() {
+        return this.originalTrainerId;
+    }
+
+    public int getAttack() {
+        return this.attack;
+    }
+
+    public int getDefense() {
+        return this.defense;
+    }
+
+    public int getSpeed() {
+        return this.speed;
+    }
+
+    public int getSpecial() {
+        return this.special;
     }
 
     private static int readTwoBytes(byte[] data, int offset) {
