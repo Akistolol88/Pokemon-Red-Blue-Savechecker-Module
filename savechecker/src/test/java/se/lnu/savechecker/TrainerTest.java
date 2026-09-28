@@ -72,4 +72,10 @@ class TrainerTest {
             badges.add(Badge.EARTH);
         });
     }
+
+    @Test
+    void rejectsNullBadge() throws Exception {
+        Trainer trainer = loadTrainer(RED_SAVE);
+        assertThrows(NullPointerException.class, () -> trainer.hasBadge(null));
+    }
 }

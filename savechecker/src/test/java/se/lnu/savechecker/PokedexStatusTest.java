@@ -1,6 +1,7 @@
 package se.lnu.savechecker;
 
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -90,14 +91,21 @@ class PokedexStatusTest {
     }
 
     @Test
-    void numbersOutsidePokedexAreFalse() throws Exception {
-        // Edge case: 0, 152 and negative numbers are not Pokémon, so they are never seen or caught.
+    void rejectsNumbersOutsidePokedex() throws Exception {
+        // Edge case: 0, 152 and negative numbers are not Pokémon; asking about them is a caller bug.
         PokedexStatus pokedex = loadPokedex(RANDOMIZER_01_SAVE);
-        assertFalse(pokedex.hasSeen(0));
-        assertFalse(pokedex.hasSeen(152));
-        assertFalse(pokedex.hasSeen(-1));
-        assertFalse(pokedex.hasCaught(0));
-        assertFalse(pokedex.hasCaught(152));
+        assertThrows(IllegalArgumentException.class, () -> pokedex.hasSeen(0));
+        assertThrows(IllegalArgumentException.class, () -> pokedex.hasSeen(152));
+        assertThrows(IllegalArgumentException.class, () -> pokedex.hasSeen(-1));
+        assertThrows(IllegalArgumentException.class, () -> pokedex.hasCaught(0));
+        assertThrows(IllegalArgumentException.class, () -> pokedex.hasCaught(152));
+    }
+
+    @Test
+    void acceptsFirstAndLastPokedexNumbers() throws Exception {
+        PokedexStatus pokedex = loadPokedex(RANDOMIZER_01_SAVE);
+        assertDoesNotThrow(() -> pokedex.hasSeen(1));
+        assertDoesNotThrow(() -> pokedex.hasCaught(151));
     }
 
     @Test

@@ -9,7 +9,7 @@ package se.lnu.savechecker;
  * {@code SaveFile} that exists is guaranteed to hold valid Generation I
  * save data.
  */
-public class SaveFile {
+public final class SaveFile {
 
     /** The player's name and badges, read from this save. */
     private final Trainer trainer;
@@ -28,7 +28,7 @@ public class SaveFile {
      *     size, or its stored checksum does not match its actual contents
      */
     public SaveFile(byte[] data) throws InvalidSaveFileException {
-        SaveFileValidator.validate(data);
+        new SaveFileValidator().validate(data);
 
         this.trainer = new Trainer(data);
         this.pokedexStatus = new PokedexStatus(data);

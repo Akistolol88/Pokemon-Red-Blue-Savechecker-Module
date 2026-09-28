@@ -18,7 +18,11 @@ class PartyTest {
 
     private static final int PARTY_COUNT_OFFSET = 0x2F2C;
     private static final int MAX_PARTY_SIZE = 6;
-    private static final int FIRST_POKEMON_EXPERIENCE_OFFSET = 0x2F34 + 14;
+    private static final int FIRST_POKEMON_START = 0x2F34;
+    private static final int POKEMON_SIZE_BYTES = 44;
+    private static final int FIRST_POKEMON_CURRENT_HP_OFFSET = FIRST_POKEMON_START + 1;
+    private static final int FIRST_POKEMON_EXPERIENCE_OFFSET = FIRST_POKEMON_START + 14;
+    private static final int FIRST_POKEMON_LEVEL_OFFSET = FIRST_POKEMON_START + 33;
 
     private static Party loadParty(String resourcePath) throws Exception {
         return new SaveFile(SaveFixtures.load(resourcePath)).getParty();
@@ -209,8 +213,13 @@ class PartyTest {
 
     @Test
     void acceptsFullParty() throws Exception {
+        // Red only has 2 Pokémon, so the empty slots are filled with copies of the first one.
         byte[] data = SaveFixtures.load(RED_SAVE);
         data[PARTY_COUNT_OFFSET] = MAX_PARTY_SIZE;
+        for (int slot = 1; slot < MAX_PARTY_SIZE; slot++) {
+            System.arraycopy(data, FIRST_POKEMON_START, data,
+                    FIRST_POKEMON_START + slot * POKEMON_SIZE_BYTES, POKEMON_SIZE_BYTES);
+        }
         assertEquals(MAX_PARTY_SIZE, new Party(data).getPokemon().size());
     }
 
@@ -234,5 +243,45 @@ class PartyTest {
                         save + ": current HP above max HP");
             }
         }
+    }
+
+    @Test
+    void rejectsLevelZero() throws Exception {
+        byte[] data = SaveFixtures.load(RED_SAVE);
+        data[FIRST_POKEMON_LEVEL_OFFSET] = 0;
+        assertThrows(InvalidSaveFileException.class, () -> new Party(data));
+    }
+
+    @Test
+    void rejectsLevelAbove100() throws Exception {
+        byte[] data = SaveFixtures.load(RED_SAVE);
+        data[FIRST_POKEMON_LEVEL_OFFSET] = 101;
+        assertThrows(InvalidSaveFileException.class, () -> new Party(data));
+    }
+
+    @Test
+    void acceptsLevelsOneAndHundred() throws Exception {
+        byte[] data = SaveFixtures.load(RED_SAVE);
+        data[FIRST_POKEMON_LEVEL_OFFSET] = 1;
+        assertEquals(1, new Party(data).getPokemon().get(0).getLevel());
+        data[FIRST_POKEMON_LEVEL_OFFSET] = 100;
+        assertEquals(100, new Party(data).getPokemon().get(0).getLevel());
+    }
+
+    @Test
+    void rejectsCurrentHpAboveMaxHp() throws Exception {
+        // Red's Eevee has 56 max HP, so 57 current HP is impossible.
+        byte[] data = SaveFixtures.load(RED_SAVE);
+        data[FIRST_POKEMON_CURRENT_HP_OFFSET] = 0;
+        data[FIRST_POKEMON_CURRENT_HP_OFFSET + 1] = 57;
+        assertThrows(InvalidSaveFileException.class, () -> new Party(data));
+    }
+
+    @Test
+    void acceptsFaintedPokemon() throws Exception {
+        byte[] data = SaveFixtures.load(RED_SAVE);
+        data[FIRST_POKEMON_CURRENT_HP_OFFSET] = 0;
+        data[FIRST_POKEMON_CURRENT_HP_OFFSET + 1] = 0;
+        assertEquals(0, new Party(data).getPokemon().get(0).getCurrentHp());
     }
 }

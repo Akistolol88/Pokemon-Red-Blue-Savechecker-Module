@@ -40,18 +40,20 @@ public final class PokedexStatus {
      * @param data the full save file, already checked by {@link SaveFileValidator}
      */
     PokedexStatus(byte[] data) {
-        this.caughtPokemon = readDexFlags(data, POKEDEX_CAUGHT_OFFSET);
-        this.seenPokemon = readDexFlags(data, POKEDEX_SEEN_OFFSET);
+        ByteReader reader = new ByteReader(data);
+        this.caughtPokemon = readDexFlags(reader, POKEDEX_CAUGHT_OFFSET);
+        this.seenPokemon = readDexFlags(reader, POKEDEX_SEEN_OFFSET);
     }
 
     /**
      * Checks whether the player has seen a Pokémon.
      *
      * @param dexNumber the Pokémon's National Pokédex number, 1 to 151
-     * @return {@code true} if it has been seen (or caught); {@code false} for
-     *     numbers outside 1 to 151
+     * @return {@code true} if it has been seen (or caught)
+     * @throws IllegalArgumentException if {@code dexNumber} is not 1 to 151
      */
     public boolean hasSeen(int dexNumber) {
+        checkDexNumber(dexNumber);
         return this.seenPokemon.contains(dexNumber);
     }
 
@@ -59,10 +61,11 @@ public final class PokedexStatus {
      * Checks whether the player has caught a Pokémon.
      *
      * @param dexNumber the Pokémon's National Pokédex number, 1 to 151
-     * @return {@code true} if it has been caught; {@code false} for numbers
-     *     outside 1 to 151
+     * @return {@code true} if it has been caught
+     * @throws IllegalArgumentException if {@code dexNumber} is not 1 to 151
      */
     public boolean hasCaught(int dexNumber) {
+        checkDexNumber(dexNumber);
         return this.caughtPokemon.contains(dexNumber);
     }
 
@@ -105,6 +108,20 @@ public final class PokedexStatus {
     }
 
     /**
+     * Stops a caller from asking about a number that is not a Gen 1 Pokémon,
+     * since that is almost always a bug in the caller's code.
+     *
+     * @param dexNumber the number the caller asked about
+     * @throws IllegalArgumentException if {@code dexNumber} is not 1 to 151
+     */
+    private void checkDexNumber(int dexNumber) {
+        if (dexNumber < 1 || dexNumber > LAST_POKEDEX_ENTRY) {
+            throw new IllegalArgumentException("Pokédex number must be 1 to "
+                    + LAST_POKEDEX_ENTRY + " but was " + dexNumber);
+        }
+    }
+
+    /**
      * Reads one 19-byte Pokédex list and returns the numbers whose bit is on.
      *
      * <p>Pokémon number {@code n} is stored in byte {@code (n - 1) / 8} of the
@@ -112,17 +129,17 @@ public final class PokedexStatus {
      * Pokédex starts at 1 but bits start at 0. For example, Pikachu (#25) is
      * byte 3, bit 0.
      *
-     * @param data the full save file
+     * @param reader reads the bytes of the save file
      * @param offset where the list starts ({@link #POKEDEX_CAUGHT_OFFSET} or
      *     {@link #POKEDEX_SEEN_OFFSET})
      * @return the Pokédex numbers that are marked in this list
      */
-    private static Set<Integer> readDexFlags(byte[] data, int offset) {
+    private Set<Integer> readDexFlags(ByteReader reader, int offset) {
         Set<Integer> dexFlags = new HashSet<>();
         for (int dexNumber = 1; dexNumber <= LAST_POKEDEX_ENTRY; dexNumber++) {
             int byteIndex = ((dexNumber - 1) / BITS_PER_BYTE);
             int bitIndex = ((dexNumber - 1) % BITS_PER_BYTE);
-            if (ByteReader.isBitSet(data, offset + byteIndex, bitIndex)) {
+            if (reader.isBitSet(offset + byteIndex, bitIndex)) {
                 dexFlags.add(dexNumber);
             }
         }

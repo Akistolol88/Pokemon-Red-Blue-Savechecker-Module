@@ -15,6 +15,9 @@ class SaveFileValidator {
     /** The exact size, in bytes, of a genuine Generation I save file. */
     private static final int EXPECTED_SAVE_SIZE_BYTES = 32_768;
 
+    /** Does the checksum part of the validation. */
+    private final CheckSumValidator checkSumValidator = new CheckSumValidator();
+
     /**
      * Validates the given save file bytes, throwing if they are invalid.
      *
@@ -23,7 +26,7 @@ class SaveFileValidator {
      *     {@value #EXPECTED_SAVE_SIZE_BYTES} bytes long, or its stored
      *     checksum does not match one recomputed from its contents
      */
-    static void validate(byte[] data) throws InvalidSaveFileException {
+    void validate(byte[] data) throws InvalidSaveFileException {
         // Checked first: reading data.length on null would crash with a NullPointerException.
         if (data == null) {
             throw new InvalidSaveFileException("No save data given (data was null)");
@@ -32,7 +35,7 @@ class SaveFileValidator {
             throw new InvalidSaveFileException("Expected " + EXPECTED_SAVE_SIZE_BYTES
                 + " bytes but got " + data.length + " bytes. \nNot a valid Pokemon Generation 1 savefile.");
         }
-        if (!CheckSumValidator.isValid(data)) {
+        if (!this.checkSumValidator.isValid(data)) {
             throw new InvalidSaveFileException("Checksum does not match");
         }
     }

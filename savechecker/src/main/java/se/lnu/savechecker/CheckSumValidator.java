@@ -45,7 +45,7 @@ class CheckSumValidator {
      *     file was corrupted, or that it was never a valid Generation I save
      *     file in the first place
      */
-    static boolean isValid(byte[] data) {
+    boolean isValid(byte[] data) {
         // Step 1: add up every byte in the checksum range.
         int sum = 0;
         for (int i = CHECKSUM_RANGE_START; i <= CHECKSUM_RANGE_END; i++) {

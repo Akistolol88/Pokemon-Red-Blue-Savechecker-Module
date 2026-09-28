@@ -14,6 +14,9 @@ package se.lnu.savechecker;
  */
 class TextDecoder {
 
+    /** Reads the bytes of the save file the text comes from. */
+    private final ByteReader reader;
+
     /** Byte that marks the end of a name. Everything after it is ignored. */
     private static final int NAME_TEXT_END = 0x50;
 
@@ -33,6 +36,15 @@ class TextDecoder {
     private static final int SPACE = 0x7F;
 
     /**
+     * Creates a decoder for text stored in one save file.
+     *
+     * @param data the full save file
+     */
+    TextDecoder(byte[] data) {
+        this.reader = new ByteReader(data);
+    }
+
+    /**
      * Turns one Gen 1 text byte into the matching Java character.
      *
      * <p>Letters and digits come in unbroken ranges, so the character is found by
@@ -43,7 +55,7 @@ class TextDecoder {
      * @param textByte one byte of Gen 1 text, as a number from 0 to 255
      * @return the matching character, or '?' if the byte is not supported
      */
-    static char decodeChar(int textByte) {
+    char decodeChar(int textByte) {
         if (textByte >= FIRST_UPPERCASE && textByte <= LAST_UPPERCASE) {
             return (char) ('A' + (textByte - FIRST_UPPERCASE));
         } else if (textByte >= FIRST_LOWERCASE && textByte <= LAST_LOWERCASE) {
@@ -63,16 +75,15 @@ class TextDecoder {
      * <p>Reading stops at the end byte {@code 0x50}, or after {@code maxLength}
      * bytes if no end byte is found, whichever comes first.
      *
-     * @param data the whole save file
-     * @param offset the position in {@code data} where the text starts
+     * @param offset the position in the save file where the text starts
      * @param maxLength the most bytes the text can take up in the save file
      * @return the decoded text, without the end byte
      */
-    static String decode(byte[] data, int offset, int maxLength) {
+    String decode(int offset, int maxLength) {
         StringBuilder decodedText = new StringBuilder();
 
         for (int i = 0; i < maxLength; i++) {
-            int textByte = ByteReader.readByte(data, offset + i);
+            int textByte = this.reader.readByte(offset + i);
             if (textByte == NAME_TEXT_END) {
                 break;
             }

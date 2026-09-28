@@ -2,6 +2,7 @@ package se.lnu.savechecker;
 
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -41,11 +42,12 @@ public final class Trainer {
      * @param data the full save file, already checked by {@link SaveFileValidator}
      */
     Trainer(byte[] data) {
-        this.name = TextDecoder.decode(data, NAME_OFFSET, NAME_MAX_BYTES);
+        this.name = new TextDecoder(data).decode(NAME_OFFSET, NAME_MAX_BYTES);
+        ByteReader reader = new ByteReader(data);
 
         this.badges = EnumSet.noneOf(Badge.class);
         for (Badge badge : Badge.values()) {
-            if (ByteReader.isBitSet(data, BADGE_OFFSET, badge.ordinal())) {
+            if (reader.isBitSet(BADGE_OFFSET, badge.ordinal())) {
                 this.badges.add(badge);
             }
         }
@@ -56,8 +58,10 @@ public final class Trainer {
      *
      * @param badge the badge to look for
      * @return {@code true} if the trainer has that badge
+     * @throws NullPointerException if {@code badge} is {@code null}
      */
     public boolean hasBadge(Badge badge) {
+        Objects.requireNonNull(badge, "badge must not be null");
         return this.badges.contains(badge);
     }
 

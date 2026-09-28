@@ -2,6 +2,7 @@ package se.lnu.savechecker;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -99,5 +100,19 @@ class SaveFileTest {
             new SaveFile(data);
         });
         assertTrue(exception.getMessage().contains("Checksum"), exception.getMessage());
+    }
+
+    @Test
+    void changingArrayAfterLoadingDoesNotChangeSave() throws Exception {
+        // Everything is read in the constructor, so the caller can't change a SaveFile afterwards
+        // by editing the array they passed in.
+        byte[] data = SaveFixtures.load("/saves/Red/Pokemon Red (UE) [S][!].sav");
+        SaveFile save = new SaveFile(data);
+        Arrays.fill(data, (byte) 0);
+
+        assertEquals("A", save.getTrainer().getName());
+        assertEquals(2, save.getParty().getPokemon().size());
+        assertEquals(20, save.getParty().getPokemon().get(0).getLevel());
+        assertEquals(7, save.getPokedexStatus().getSeenCount());
     }
 }

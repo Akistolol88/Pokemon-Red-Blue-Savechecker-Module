@@ -11,7 +11,7 @@ public final class Party {
     private final List<PartyPokemon> pokemon;
 
     Party(byte[] data) throws InvalidSaveFileException {
-        int partyCount = ByteReader.readByte(data, PARTY_COUNT_OFFSET);
+        int partyCount = new ByteReader(data).readByte(PARTY_COUNT_OFFSET);
         if (partyCount > MAX_PARTY_SIZE) {
             throw new InvalidSaveFileException("Party can hold at most " + MAX_PARTY_SIZE
                     + " Pokemon but the save says " + partyCount);

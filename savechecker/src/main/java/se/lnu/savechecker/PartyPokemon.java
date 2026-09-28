@@ -7,6 +7,9 @@ public final class PartyPokemon {
     private static final int NICKNAME_OFFSET = 0x307E;
     private static final int NAME_MAX_BYTES = 11;
 
+    private static final int MIN_LEVEL = 1;
+    private static final int MAX_LEVEL = 100;
+
     private static final int CURRENT_HP_OFFSET = 1;
     private static final int OT_ID_OFFSET = 12;
     private static final int EXPERIENCE_OFFSET = 14;
@@ -43,29 +46,32 @@ public final class PartyPokemon {
     private final int speed;
     private final int special;
 
-    PartyPokemon(byte[] data, int slot) {
+    PartyPokemon(byte[] data, int slot) throws InvalidSaveFileException {
         int start = PARTY_DATA_OFFSET + (slot * POKEMON_SIZE_BYTES);
         int nicknameStart = NICKNAME_OFFSET + (slot * NAME_MAX_BYTES);
+        ByteReader reader = new ByteReader(data);
 
-        this.nickname = TextDecoder.decode(data, nicknameStart, NAME_MAX_BYTES);
-        this.currentHp = ByteReader.readTwoBytes(data, start + CURRENT_HP_OFFSET);
-        this.originalTrainerId = ByteReader.readTwoBytes(data, start + OT_ID_OFFSET);
-        this.experience = ByteReader.readThreeBytes(data, start + EXPERIENCE_OFFSET);
-        this.hpEv = ByteReader.readTwoBytes(data, start + HP_EV_OFFSET);
-        this.attackEv = ByteReader.readTwoBytes(data, start + ATTACK_EV_OFFSET);
-        this.defenseEv = ByteReader.readTwoBytes(data, start + DEFENSE_EV_OFFSET);
-        this.speedEv = ByteReader.readTwoBytes(data, start + SPEED_EV_OFFSET);
-        this.specialEv = ByteReader.readTwoBytes(data, start + SPECIAL_EV_OFFSET);
-        this.attackIv = ByteReader.readHighHalf(data, start + IV_OFFSET);
-        this.defenseIv = ByteReader.readLowHalf(data, start + IV_OFFSET);
-        this.speedIv = ByteReader.readHighHalf(data, start + IV_OFFSET + 1);
-        this.specialIv = ByteReader.readLowHalf(data, start + IV_OFFSET + 1);
-        this.level = ByteReader.readByte(data, start + LEVEL_OFFSET);
-        this.maxHp = ByteReader.readTwoBytes(data, start + MAX_HP_OFFSET);
-        this.attack = ByteReader.readTwoBytes(data, start + ATTACK_OFFSET);
-        this.defense = ByteReader.readTwoBytes(data, start + DEFENSE_OFFSET);
-        this.speed = ByteReader.readTwoBytes(data, start + SPEED_OFFSET);
-        this.special = ByteReader.readTwoBytes(data, start + SPECIAL_OFFSET);
+        this.nickname = new TextDecoder(data).decode(nicknameStart, NAME_MAX_BYTES);
+        this.currentHp = reader.readTwoBytes(start + CURRENT_HP_OFFSET);
+        this.originalTrainerId = reader.readTwoBytes(start + OT_ID_OFFSET);
+        this.experience = reader.readThreeBytes(start + EXPERIENCE_OFFSET);
+        this.hpEv = reader.readTwoBytes(start + HP_EV_OFFSET);
+        this.attackEv = reader.readTwoBytes(start + ATTACK_EV_OFFSET);
+        this.defenseEv = reader.readTwoBytes(start + DEFENSE_EV_OFFSET);
+        this.speedEv = reader.readTwoBytes(start + SPEED_EV_OFFSET);
+        this.specialEv = reader.readTwoBytes(start + SPECIAL_EV_OFFSET);
+        this.attackIv = reader.readHighHalf(start + IV_OFFSET);
+        this.defenseIv = reader.readLowHalf(start + IV_OFFSET);
+        this.speedIv = reader.readHighHalf(start + IV_OFFSET + 1);
+        this.specialIv = reader.readLowHalf(start + IV_OFFSET + 1);
+        this.level = reader.readByte(start + LEVEL_OFFSET);
+        this.maxHp = reader.readTwoBytes(start + MAX_HP_OFFSET);
+        this.attack = reader.readTwoBytes(start + ATTACK_OFFSET);
+        this.defense = reader.readTwoBytes(start + DEFENSE_OFFSET);
+        this.speed = reader.readTwoBytes(start + SPEED_OFFSET);
+        this.special = reader.readTwoBytes(start + SPECIAL_OFFSET);
+
+        checkValues(slot);
     }
 
     /**
@@ -164,5 +170,16 @@ public final class PartyPokemon {
 
     public int getSpecial() {
         return this.special;
+    }
+
+    private void checkValues(int slot) throws InvalidSaveFileException {
+        if (this.level < MIN_LEVEL || this.level > MAX_LEVEL) {
+            throw new InvalidSaveFileException("Party Pokemon " + (slot + 1) + " has level "
+                    + this.level + ", but levels go from " + MIN_LEVEL + " to " + MAX_LEVEL);
+        }
+        if (this.currentHp > this.maxHp) {
+            throw new InvalidSaveFileException("Party Pokemon " + (slot + 1) + " has "
+                    + this.currentHp + " HP, more than its max HP of " + this.maxHp);
+        }
     }
 }

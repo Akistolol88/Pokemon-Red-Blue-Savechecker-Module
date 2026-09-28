@@ -10,6 +10,8 @@ import java.util.List;
 
 class CheckSumValidatorTest {
 
+    private final CheckSumValidator validator = new CheckSumValidator();
+
     private static final int FIRST_CHECKSUMMED_BYTE = 0x2598;
     private static final int LAST_CHECKSUMMED_BYTE = 0x3522;
     private static final int STORED_CHECKSUM_BYTE = 0x3523;
@@ -20,7 +22,7 @@ class CheckSumValidatorTest {
         List<Path> saves = SaveFixtures.findAll();
         assertFalse(saves.isEmpty(), "no save files found in /saves");
         for (Path save : saves) {
-            assertTrue(CheckSumValidator.isValid(Files.readAllBytes(save)),
+            assertTrue(validator.isValid(Files.readAllBytes(save)),
                 save.getFileName().toString());
         }
     }
@@ -29,14 +31,14 @@ class CheckSumValidatorTest {
         byte[] data = SaveFixtures.load("/saves/Yellow/Yellow_Random_01.srm");
         byte[] copyData = Arrays.copyOf(data, data.length);
         copyData[FIRST_CHECKSUMMED_BYTE] = (byte) (copyData[FIRST_CHECKSUMMED_BYTE] + 1);
-        assertFalse(CheckSumValidator.isValid(copyData));
+        assertFalse(validator.isValid(copyData));
     }
     @Test
     void rejectsCorruptedCheckSum() throws Exception {
         byte[] data = SaveFixtures.load("/saves/Yellow/Yellow_Randomizer_01.srm");
         byte[] copyData = Arrays.copyOf(data, data.length);
         copyData[STORED_CHECKSUM_BYTE] = (byte) (copyData[STORED_CHECKSUM_BYTE] + 1);
-        assertFalse(CheckSumValidator.isValid(copyData));
+        assertFalse(validator.isValid(copyData));
     }
 
     @Test
@@ -44,7 +46,7 @@ class CheckSumValidatorTest {
         // Edge case: the last byte inside the range must still be counted (off-by-one check).
         byte[] data = SaveFixtures.load(YELLOW_SAVE);
         data[LAST_CHECKSUMMED_BYTE] = (byte) (data[LAST_CHECKSUMMED_BYTE] + 1);
-        assertFalse(CheckSumValidator.isValid(data));
+        assertFalse(validator.isValid(data));
     }
 
     @Test
@@ -55,7 +57,7 @@ class CheckSumValidatorTest {
         int byteAfterStoredChecksum = STORED_CHECKSUM_BYTE + 1;
         data[byteBeforeRange] = (byte) (data[byteBeforeRange] + 1);
         data[byteAfterStoredChecksum] = (byte) (data[byteAfterStoredChecksum] + 1);
-        assertTrue(CheckSumValidator.isValid(data));
+        assertTrue(validator.isValid(data));
     }
 
     @Test
@@ -65,7 +67,7 @@ class CheckSumValidatorTest {
         byte[] data = SaveFixtures.load(YELLOW_SAVE);
         data[FIRST_CHECKSUMMED_BYTE] = (byte) (data[FIRST_CHECKSUMMED_BYTE] + 1);
         data[STORED_CHECKSUM_BYTE] = (byte) (data[STORED_CHECKSUM_BYTE] - 1);
-        assertTrue(CheckSumValidator.isValid(data));
+        assertTrue(validator.isValid(data));
     }
 
     @Test
@@ -75,6 +77,6 @@ class CheckSumValidatorTest {
         byte[] data = SaveFixtures.load(YELLOW_SAVE);
         data[FIRST_CHECKSUMMED_BYTE] = (byte) (data[FIRST_CHECKSUMMED_BYTE] + 1);
         data[LAST_CHECKSUMMED_BYTE] = (byte) (data[LAST_CHECKSUMMED_BYTE] - 1);
-        assertTrue(CheckSumValidator.isValid(data));
+        assertTrue(validator.isValid(data));
     }
 }
