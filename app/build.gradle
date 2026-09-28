@@ -1,8 +1,8 @@
 plugins {
-    // Shared convention plugins for the Java toolchain, static analysis, and test lifecycle.
+    // Shared convention plugins for the Java toolchain and static analysis.
+    // No testing conventions: the test app is tested manually (see TEST_REPORT.md).
     id 'lnu.java-conventions'
     id 'lnu.quality-conventions'
-    id 'lnu.testing-conventions'
 
     // Packages and runs the module as a CLI application.
     id 'application'
@@ -17,10 +17,6 @@ application {
 
 dependencies {
     implementation project(':savechecker')
-    
-    testImplementation libs.junit.jupiter.api
-    testRuntimeOnly    libs.junit.jupiter.engine
-    testRuntimeOnly    "org.junit.platform:junit-platform-launcher"
 }
 
 // Run the app from the repo root so relative save file paths work as typed.
