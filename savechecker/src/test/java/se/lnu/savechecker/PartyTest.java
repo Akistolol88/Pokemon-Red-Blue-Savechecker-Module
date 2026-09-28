@@ -92,6 +92,39 @@ class PartyTest {
     }
 
     @Test
+    void readsEffortValuesFromOneBattle() throws Exception {
+        // Beating a Pokémon adds its base stats to the winner's EVs. Squirtle has beaten the
+        // rival's Bulbasaur once, so its EVs equal Bulbasaur's base stats (45/49/49/45/65).
+        PartyPokemon squirtle = loadParty(RED_SAVE).getPokemon().get(1);
+        assertEquals(45, squirtle.getHpEv());
+        assertEquals(49, squirtle.getAttackEv());
+        assertEquals(49, squirtle.getDefenseEv());
+        assertEquals(45, squirtle.getSpeedEv());
+        assertEquals(65, squirtle.getSpecialEv());
+    }
+
+    @Test
+    void readsZeroEffortValues() throws Exception {
+        PartyPokemon eevee = loadParty(RED_SAVE).getPokemon().get(0);
+        assertEquals(0, eevee.getHpEv());
+        assertEquals(0, eevee.getAttackEv());
+        assertEquals(0, eevee.getDefenseEv());
+        assertEquals(0, eevee.getSpeedEv());
+        assertEquals(0, eevee.getSpecialEv());
+    }
+
+    @Test
+    void readsLargeEffortValues() throws Exception {
+        // Values above 255 only come out right if both bytes are combined.
+        PartyPokemon alakazam = loadParty(YELLOW_SAVE).getPokemon().get(0);
+        assertEquals(8988, alakazam.getHpEv());
+        assertEquals(9910, alakazam.getAttackEv());
+        assertEquals(9407, alakazam.getDefenseEv());
+        assertEquals(9381, alakazam.getSpeedEv());
+        assertEquals(9439, alakazam.getSpecialEv());
+    }
+
+    @Test
     void readsRedFirstPokemon() throws Exception {
         PartyPokemon eevee = loadParty(RED_SAVE).getPokemon().get(0);
         assertEquals("EEVEE", eevee.getNickname());

@@ -16,6 +16,11 @@ public final class PartyPokemon {
     private static final int DEFENSE_OFFSET = 38;
     private static final int SPEED_OFFSET = 40;
     private static final int SPECIAL_OFFSET = 42;
+    private static final int HP_EV_OFFSET = 17;
+    private static final int ATTACK_EV_OFFSET = 19;
+    private static final int DEFENSE_EV_OFFSET = 21;
+    private static final int SPEED_EV_OFFSET = 23;
+    private static final int SPECIAL_EV_OFFSET = 25;
     private static final int OT_ID_OFFSET = 12;
 
     private final String nickname;
@@ -27,6 +32,11 @@ public final class PartyPokemon {
     private final int defense;
     private final int speed;
     private final int special;
+    private final int hpEv;
+    private final int attackEv;
+    private final int defenseEv;
+    private final int speedEv;
+    private final int specialEv;
 
     PartyPokemon(byte[] data, int slot) {
         int start = PARTY_DATA_OFFSET + (slot * POKEMON_SIZE_BYTES);
@@ -41,6 +51,11 @@ public final class PartyPokemon {
         this.defense = readTwoBytes(data, start + DEFENSE_OFFSET);
         this.speed = readTwoBytes(data, start + SPEED_OFFSET);
         this.special = readTwoBytes(data, start + SPECIAL_OFFSET);
+        this.hpEv = readTwoBytes(data, start + HP_EV_OFFSET);
+        this.attackEv = readTwoBytes(data, start + ATTACK_EV_OFFSET);
+        this.defenseEv = readTwoBytes(data, start + DEFENSE_EV_OFFSET);
+        this.speedEv = readTwoBytes(data, start + SPEED_EV_OFFSET);
+        this.specialEv = readTwoBytes(data, start + SPECIAL_EV_OFFSET);
     }
 
     /**
@@ -99,6 +114,26 @@ public final class PartyPokemon {
 
     public int getSpecial() {
         return this.special;
+    }
+
+    public int getHpEv() {
+        return this.hpEv;
+    }
+
+    public int getAttackEv() {
+        return this.attackEv;
+    }
+
+    public int getDefenseEv() {
+        return this.defenseEv;
+    }
+
+    public int getSpeedEv() {
+        return this.speedEv;
+    }
+
+    public int getSpecialEv() {
+        return this.specialEv;
     }
 
     private static int readTwoBytes(byte[] data, int offset) {
