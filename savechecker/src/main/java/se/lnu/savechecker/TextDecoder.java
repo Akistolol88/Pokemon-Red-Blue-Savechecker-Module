@@ -72,9 +72,7 @@ class TextDecoder {
         StringBuilder decodedText = new StringBuilder();
 
         for (int i = 0; i < maxLength; i++) {
-            // "& 0xFF" turns Java's signed byte (-128 to 127) into 0 to 255,
-            // so bytes like 0x80 are not read as negative numbers.
-            int textByte = data[offset + i] & 0xFF;
+            int textByte = ByteReader.readByte(data, offset + i);
             if (textByte == NAME_TEXT_END) {
                 break;
             }

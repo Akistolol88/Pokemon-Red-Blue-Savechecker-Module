@@ -36,9 +36,7 @@ public final class Trainer {
      * Reads the trainer's name and badges from a save file's raw bytes.
      *
      * <p>Each badge is one bit in the badge byte, and a badge's
-     * {@link Badge#ordinal()} is its bit number. For every badge, the byte is
-     * shifted right so that badge's bit lands in the last position, and
-     * {@code & 1} keeps only that bit: 1 means earned, 0 means not.
+     * {@link Badge#ordinal()} is its bit number: bit on means earned.
      *
      * @param data the full save file, already checked by {@link SaveFileValidator}
      */
@@ -46,10 +44,8 @@ public final class Trainer {
         this.name = TextDecoder.decode(data, NAME_OFFSET, NAME_MAX_BYTES);
 
         this.badges = EnumSet.noneOf(Badge.class);
-        int badgeByte = data[BADGE_OFFSET] & 0xFF;
-
         for (Badge badge : Badge.values()) {
-            if (((badgeByte >> badge.ordinal()) & 1) == 1) {
+            if (ByteReader.isBitSet(data, BADGE_OFFSET, badge.ordinal())) {
                 this.badges.add(badge);
             }
         }

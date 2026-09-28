@@ -1,9 +1,6 @@
 package se.lnu.savechecker;
 
 public final class PartyPokemon {
-    private static final int HIGH_BYTE_MULTIPLIER = 256;
-    private static final int HIGHEST_BYTE_MULTIPLIER = 65536;
-
     private static final int PARTY_DATA_OFFSET = 0x2F34;
     private static final int POKEMON_SIZE_BYTES = 44;
 
@@ -18,6 +15,7 @@ public final class PartyPokemon {
     private static final int DEFENSE_EV_OFFSET = 21;
     private static final int SPEED_EV_OFFSET = 23;
     private static final int SPECIAL_EV_OFFSET = 25;
+    private static final int IV_OFFSET = 27;
     private static final int LEVEL_OFFSET = 33;
     private static final int MAX_HP_OFFSET = 34;
     private static final int ATTACK_OFFSET = 36;
@@ -34,6 +32,10 @@ public final class PartyPokemon {
     private final int defenseEv;
     private final int speedEv;
     private final int specialEv;
+    private final int attackIv;
+    private final int defenseIv;
+    private final int speedIv;
+    private final int specialIv;
     private final int level;
     private final int maxHp;
     private final int attack;
@@ -46,20 +48,24 @@ public final class PartyPokemon {
         int nicknameStart = NICKNAME_OFFSET + (slot * NAME_MAX_BYTES);
 
         this.nickname = TextDecoder.decode(data, nicknameStart, NAME_MAX_BYTES);
-        this.currentHp = readTwoBytes(data, start + CURRENT_HP_OFFSET);
-        this.originalTrainerId = readTwoBytes(data, start + OT_ID_OFFSET);
-        this.experience = readThreeBytes(data, start + EXPERIENCE_OFFSET);
-        this.hpEv = readTwoBytes(data, start + HP_EV_OFFSET);
-        this.attackEv = readTwoBytes(data, start + ATTACK_EV_OFFSET);
-        this.defenseEv = readTwoBytes(data, start + DEFENSE_EV_OFFSET);
-        this.speedEv = readTwoBytes(data, start + SPEED_EV_OFFSET);
-        this.specialEv = readTwoBytes(data, start + SPECIAL_EV_OFFSET);
-        this.level = data[start + LEVEL_OFFSET] & 0xFF;
-        this.maxHp = readTwoBytes(data, start + MAX_HP_OFFSET);
-        this.attack = readTwoBytes(data, start + ATTACK_OFFSET);
-        this.defense = readTwoBytes(data, start + DEFENSE_OFFSET);
-        this.speed = readTwoBytes(data, start + SPEED_OFFSET);
-        this.special = readTwoBytes(data, start + SPECIAL_OFFSET);
+        this.currentHp = ByteReader.readTwoBytes(data, start + CURRENT_HP_OFFSET);
+        this.originalTrainerId = ByteReader.readTwoBytes(data, start + OT_ID_OFFSET);
+        this.experience = ByteReader.readThreeBytes(data, start + EXPERIENCE_OFFSET);
+        this.hpEv = ByteReader.readTwoBytes(data, start + HP_EV_OFFSET);
+        this.attackEv = ByteReader.readTwoBytes(data, start + ATTACK_EV_OFFSET);
+        this.defenseEv = ByteReader.readTwoBytes(data, start + DEFENSE_EV_OFFSET);
+        this.speedEv = ByteReader.readTwoBytes(data, start + SPEED_EV_OFFSET);
+        this.specialEv = ByteReader.readTwoBytes(data, start + SPECIAL_EV_OFFSET);
+        this.attackIv = ByteReader.readHighHalf(data, start + IV_OFFSET);
+        this.defenseIv = ByteReader.readLowHalf(data, start + IV_OFFSET);
+        this.speedIv = ByteReader.readHighHalf(data, start + IV_OFFSET + 1);
+        this.specialIv = ByteReader.readLowHalf(data, start + IV_OFFSET + 1);
+        this.level = ByteReader.readByte(data, start + LEVEL_OFFSET);
+        this.maxHp = ByteReader.readTwoBytes(data, start + MAX_HP_OFFSET);
+        this.attack = ByteReader.readTwoBytes(data, start + ATTACK_OFFSET);
+        this.defense = ByteReader.readTwoBytes(data, start + DEFENSE_OFFSET);
+        this.speed = ByteReader.readTwoBytes(data, start + SPEED_OFFSET);
+        this.special = ByteReader.readTwoBytes(data, start + SPECIAL_OFFSET);
     }
 
     /**
@@ -110,6 +116,22 @@ public final class PartyPokemon {
         return this.specialEv;
     }
 
+    public int getAttackIv() {
+        return this.attackIv;
+    }
+
+    public int getDefenseIv() {
+        return this.defenseIv;
+    }
+
+    public int getSpeedIv() {
+        return this.speedIv;
+    }
+
+    public int getSpecialIv() {
+        return this.specialIv;
+    }
+
     /**
      * Returns the Pokémon's level.
      *
@@ -142,15 +164,5 @@ public final class PartyPokemon {
 
     public int getSpecial() {
         return this.special;
-    }
-
-    private static int readTwoBytes(byte[] data, int offset) {
-        return (data[offset] & 0xFF) * HIGH_BYTE_MULTIPLIER + (data[offset + 1] & 0xFF);
-    }
-
-    private static int readThreeBytes(byte[] data, int offset) {
-        return (data[offset] & 0xFF) * HIGHEST_BYTE_MULTIPLIER
-                + (data[offset + 1] & 0xFF) * HIGH_BYTE_MULTIPLIER
-                + (data[offset + 2] & 0xFF);
     }
 }

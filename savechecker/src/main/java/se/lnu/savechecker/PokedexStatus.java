@@ -122,8 +122,7 @@ public final class PokedexStatus {
         for (int dexNumber = 1; dexNumber <= LAST_POKEDEX_ENTRY; dexNumber++) {
             int byteIndex = ((dexNumber - 1) / BITS_PER_BYTE);
             int bitIndex = ((dexNumber - 1) % BITS_PER_BYTE);
-            int byteDex = data[offset + byteIndex] & 0xFF;
-            if (((byteDex >> bitIndex) & 1) == 1) {
+            if (ByteReader.isBitSet(data, offset + byteIndex, bitIndex)) {
                 dexFlags.add(dexNumber);
             }
         }
