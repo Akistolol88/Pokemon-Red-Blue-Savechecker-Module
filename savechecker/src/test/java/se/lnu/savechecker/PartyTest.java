@@ -18,6 +18,7 @@ class PartyTest {
 
     private static final int PARTY_COUNT_OFFSET = 0x2F2C;
     private static final int MAX_PARTY_SIZE = 6;
+    private static final int FIRST_POKEMON_EXPERIENCE_OFFSET = 0x2F34 + 14;
 
     private static Party loadParty(String resourcePath) throws Exception {
         return new SaveFile(SaveFixtures.load(resourcePath)).getParty();
@@ -36,6 +37,11 @@ class PartyTest {
     @Test
     void readsRedSecondPokemonOriginalTrainerId() throws Exception {
         assertEquals(48035, loadParty(RED_SAVE).getPokemon().get(1).getOriginalTrainerId());
+    }
+
+    @Test
+    void readsRedFirstPokemonExperience() throws Exception {
+        assertEquals(8000, loadParty(RED_SAVE).getPokemon().get(0).getExperience());
     }
 
     @Test
@@ -122,6 +128,22 @@ class PartyTest {
         assertEquals(9407, alakazam.getDefenseEv());
         assertEquals(9381, alakazam.getSpeedEv());
         assertEquals(9439, alakazam.getSpecialEv());
+    }
+
+    @Test
+    void readsExperienceAboveTwoBytes() throws Exception {
+        // 94961 is above 65535, the most two bytes can hold, so the third byte must be read.
+        assertEquals(94961, loadParty(YELLOW_SAVE).getPokemon().get(0).getExperience());
+    }
+
+    @Test
+    void combinesAllThreeExperienceBytes() throws Exception {
+        // Bytes 1, 0, 5 mean 1 * 65536 + 0 * 256 + 5 = 65541.
+        byte[] data = SaveFixtures.load(RED_SAVE);
+        data[FIRST_POKEMON_EXPERIENCE_OFFSET] = 1;
+        data[FIRST_POKEMON_EXPERIENCE_OFFSET + 1] = 0;
+        data[FIRST_POKEMON_EXPERIENCE_OFFSET + 2] = 5;
+        assertEquals(65541, new Party(data).getPokemon().get(0).getExperience());
     }
 
     @Test
