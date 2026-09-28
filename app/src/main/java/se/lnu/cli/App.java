@@ -1,32 +1,18 @@
 package se.lnu.cli;
 
+import se.lnu.savechecker.SaveFile;
+import se.lnu.savechecker.Trainer;
+import se.lnu.savechecker.PokedexStatus;
+import se.lnu.savechecker.InvalidSaveFileException;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 /**
  * Main application class and execution entry point.
  */
 public class App {
 
-    /**
-     * Extracts the name argument from the command line.
-     *
-     * @param args command-line arguments passed to {@link #main}
-     * @return the first positional argument, or {@code null} if none was given
-     */
-    public static String parseArgs(String[] args) {
-        return args.length > 0 ? args[0] : null;
-    }
-
-    /**
-     * Generates a formatted greeting message.
-     *
-     * @param name the name of the person to greet; blank falls back to a guest greeting
-     * @return the complete greeting message
-     */
-    public static String generateGreeting(String name) {
-        if (name == null || name.isBlank()) {
-            return "Hello, Guest!";
-        }
-        return "Hello, " + name + "!";
-    }
 
     /**
      * Execution entry point.
@@ -34,13 +20,39 @@ public class App {
      * @param args command-line arguments
      */
     public static void main(String[] args) {
-        System.out.println("🚀 CLI Application is up and running!");
-        System.out.println("Edit App.java and run './gradlew run' to see your changes.");
+        new App().run(args);
+    }
 
-        String name = parseArgs(args);
-        String greeting = generateGreeting(name != null ? name : "Brian Kernighan");
+    public void run(String[] args) {
+        if (args.length == 0) {
+            System.out.println("Usage: ./gradlew run --args=\"<path to .sav file>\"");
+            return;
+        }
+        String savePath = args[0];
+        System.out.println(savePath);  
+        try {
+            byte[] saveData = Files.readAllBytes(Path.of(savePath));
+            SaveFile save = new SaveFile(saveData);
+            printTrainer(save.getTrainer());
+            printPokedex(save.getPokedexStatus());
+        } catch (IOException e) {
+            System.out.println("Could not load save: " + savePath);
+            return;
+        } catch (InvalidSaveFileException e) {
+            System.out.println("Could not load Pokemon Generation 1 save: " + e.getMessage());
+            return;
+        }
+    }
 
-        System.out.println();
-        System.out.println("Message of the day: " + greeting);
+    private void printTrainer(Trainer trainer) {
+        System.out.println("Your Trainername is :" + trainer.getName());
+        System.out.println("You have " + trainer.getBadges().size() + " Badges");
+        System.out.println("You have these badges: " + trainer.getBadges());
+    }
+
+    private void printPokedex(PokedexStatus pokedex) {
+        System.out.println("You have seen " + pokedex.getSeenCount() + " / 151 Pokemons");
+        System.out.println("You have caught " + pokedex.getCaughtCount() + " / 151 Pokemons");
+
     }
 }
