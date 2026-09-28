@@ -17,6 +17,9 @@ public class SaveFile {
     /** Which Pokémon the player has seen and caught, read from this save. */
     private final PokedexStatus pokedexStatus;
 
+    /** The Pokémon the player is carrying (up to six), read from this save. */
+    private final Party party;
+
     /**
      * Reads and validates the raw bytes of a Generation I save file.
      *
@@ -29,6 +32,7 @@ public class SaveFile {
 
         this.trainer = new Trainer(data);
         this.pokedexStatus = new PokedexStatus(data);
+        this.party = new Party(data);
     }
 
     /**
@@ -49,5 +53,15 @@ public class SaveFile {
      */
     public PokedexStatus getPokedexStatus() {
         return this.pokedexStatus;
+    }
+
+    /**
+     * Returns the player's current party: the up to six Pokémon they are
+     * carrying, in the order they appear in the in-game party menu.
+     *
+     * @return the party from this save
+     */
+    public Party getParty() {
+        return this.party;
     }
 }
