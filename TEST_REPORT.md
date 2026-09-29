@@ -53,5 +53,5 @@ PMD warnings.
 
 ### AI-written tests
 
-I wrote the first tests of each class myselfand then the remaining tests that follow the same patterns, and
+I wrote the first tests of each class myself and then the remaining tests that follow the same patterns, and
 most edge cases, were written by AI. 
