@@ -15,7 +15,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = 'java-gradle-cli-template'
+rootProject.name = 'pokemon-savechecker'
 
 include("app", "savechecker")
 

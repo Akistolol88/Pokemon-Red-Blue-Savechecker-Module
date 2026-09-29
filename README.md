@@ -1,219 +1,201 @@
-# Java (Gradle) CLI Template
+# Pokemon Red/Blue SaveChecker Module
 
-Welcome to the **1dv610** Java Command-Line Interface (CLI) template. This repository serves as a
-clean, pre-configured boilerplate for building robust Java console applications with modern tools
-and best practices.
+## What it does
 
-## 🚀 Features
+A Java module for developers who want to read Pokémon Red, Blue and Yellow (Generation 1) save
+files in their own programs. You pass the raw bytes of a `.sav` file to `SaveFile`, and it checks
+that the file is valid and gives you:
 
-- **Gradle Build:** Wrapper scripts included — no local Gradle installation required.
-- **Application Plugin:** `./gradlew run` builds and runs the CLI in one step.
-- **Unit Testing:** Pre-configured with [JUnit 5](https://junit.org/junit5/).
-- **Code Quality:** [Checkstyle](https://checkstyle.org) (Google Java Style) and
-  [PMD](https://pmd.github.io) static analysis, with a custom summary reporter and a build-failing
-  quality gate.
-- **Build Logic:** Composite build with reusable convention plugins
-  (`build-logic/`), keeping `app/build.gradle` minimal.
-- **IDE Support:** Pre-configured for Visual Studio Code, including a debug configuration.
+- **Checksum check:** rejects files that are the wrong size or whose checksum does not match.
+- **Trainer:** the trainer name and which of the 8 gym badges have been earned.
+- **Pokédex:** which Pokémon have been seen and caught, as counts or per Pokédex number.
+- **Party:** up to six Pokémon, each with nickname, level, experience, current and max HP, stats,
+  EVs, IVs and original trainer ID.
 
----
+## What it doesn't do
 
-## 🛠️ Getting Started
+- It only reads saves. It cannot edit or write them.
+- It does not read PC boxes, items or money.
+- It does not read Pokémon moves, species, types or HP IV.
+- The checksum cannot detect changes that cancel each other out (for example one byte going up by
+  1 and another going down by 1).
+- Text characters it does not recognise are shown as `?`.
+- It has been tested with Red and Yellow saves. Blue uses the same save format as Red but has no
+  test save of its own.
 
-### Prerequisites
+## Requirements
 
-Ensure you have a **JDK 25** (or compatible) and **Git** installed on your machine. The Gradle
-wrapper is included, so no separate Gradle installation is needed.
+- JDK 25
+- Git (to clone the repo)
+- A Pokémon Red, Blue or Yellow save file (exactly 32,768 bytes)
 
-### Installation & Project Setup
+No Gradle install is needed, because the Gradle wrapper is included.
 
-Pick the flow that matches your situation.
+## Installation
 
-#### A. Starting from scratch (no repository yet) — recommended
-
-Use GitHub's built-in template flow — no git commands needed to get a clean, single-commit history:
-
-1. On GitHub, open this template repository and click **Use this template → Create a new repository**.
-2. Clone your new repository and move into it:
-
+1. Clone the repo:
    ```bash
-   git clone <your-newly-created-repository-url>
-   cd <your-repository-name>
+   git clone https://github.com/Akistolol88/Pokemon-Red-Blue-Savechecker-Module.git
+   cd Pokemon-Red-Blue-Savechecker-Module
    ```
-
-3. Build the project (also verifies your JDK setup):
-
+2. Build it once to check that everything works:
    ```bash
    ./gradlew build
    ```
+   On Windows, use `gradlew.bat build`.
+3. Add the module to your own project. The `savechecker` folder has to be inside your Gradle build,
+   next to your own project. Copy it to the root of your project, or build your project inside this
+   repo (like the `app` test app does). Then add:
+   ```groovy
+   // settings.gradle
+   include("savechecker")
 
-GitHub gives your new repository its own single commit copied from this template — no shared
-history, nothing to merge or squash.
-
-> **Note:** This requires the template repository to have **Template repository** enabled under
-> its GitHub Settings → General. If the "Use this template" button isn't available, use flow B
-> instead.
-
-#### B. Importing into an existing repository (empty or not)
-
-Use this flow if you already have a repository — e.g. one provisioned by GitHub Classroom — that
-you can't or don't want to recreate from a template.
-
-1. Clone your existing repository and move into it:
-
-   ```bash
-   git clone <your-existing-repository-url>
-   cd <your-repository-name>
+   // your project's build.gradle
+   dependencies {
+       implementation project(':savechecker')
+   }
+   ```
+4. Import the classes you need from the `se.lnu.savechecker` package:
+   ```java
+   import se.lnu.savechecker.SaveFile;
    ```
 
-2. If the repository has no commits yet, create an empty initial commit:
+## Usage
 
-   ```bash
-   git commit --allow-empty -m "Initial commit"
-   ```
-
-   _Note: This step is required for a genuinely empty repository. A branch with zero commits has
-   nothing for `--squash` to diff against, so `git pull --squash` silently falls back to a plain
-   fast-forward — it imports this template's entire internal commit history unmodified instead of
-   collapsing it into one clean commit. An empty commit gives `--squash` a (empty) tree to compare
-   against, so it behaves as intended. Skip this step if the repository already has commits (e.g.
-   an auto-generated README)._
-
-3. **Pull and squash the boilerplate code** from this template repository into your branch:
-
-   ```bash
-   git pull git@github.com:1dv610/java-gradle-cli-template.git main --squash --allow-unrelated-histories
-   ```
-
-   _Note: Using `--squash` ensures that the boilerplate's internal development history is collapsed
-   into a single, clean starting point in your repository. If your repository already had files
-   (e.g. GitHub auto-created a README or `.gitignore`), this will report a conflict on those files —
-   resolve it by taking the template's version: `git checkout --theirs <file> && git add <file>`._
-
-4. **Commit the imported files** to finalize the import of the boilerplate:
-
-   ```bash
-   git commit -m "Initial commit from boilerplate"
-   ```
-
-5. **Build the project** to verify your JDK setup:
-
-   ```bash
-   ./gradlew build
-   ```
-
-6. **Push the clean boilerplate setup** up to your own GitHub repository:
-  
-   ```bash
-   git push origin main
-   ```
-
----
-
-## 💻 Available Gradle Tasks
-
-### Running the Application
-
-Builds and runs the main console application entry point (`App.java`), optionally passing a name
-as the first argument:
-
-```bash
-./gradlew run -q
-./gradlew run -q --args="Ada Lovelace"
+```java
+try {
+   byte[] saveData = Files.readAllBytes(Path.of("red.sav"));
+   SaveFile save = new SaveFile(saveData);
+   System.out.println(save.getTrainer().getName());
+   System.out.println(save.getTrainer().hasBadge(Badge.RAINBOW));
+   System.out.println(save.getPokedexStatus().getCaughtCount());
+   for (PartyPokemon pokemon : save.getParty().getPokemon()) {
+      System.out.println(pokemon.getNickname() + " Lv. " + pokemon.getLevel());
+   }
+} catch (IOException e) {
+   System.out.println("file could not be read");
+} catch (InvalidSaveFileException e) {
+   System.out.println(e.getMessage());
+}
 ```
 
-_Note: Rename the `se.lnu.cli` package (and `group`/`mainClass` in `app/build.gradle`) to match
-your own project when adapting this template._
+`SaveFile` throws an `InvalidSaveFileException` if the data is `null`, the wrong size or has the wrong checksum.
 
-### Building
+## Public API
 
-Compiles and packages the application:
+All classes are in the `se.lnu.savechecker` package. Start with `SaveFile`; every other object is
+reached through it.
+
+### `SaveFile`
+
+Reads and validates the raw bytes of a save file.
+
+| Constructor / method | Returns |
+|---  |---|
+| `SaveFile(byte[] data)` | a new save. Throws `InvalidSaveFileException` if `data` is `null`, the wrong size, or has the wrong checksum |
+| `getTrainer()` | the `Trainer` in this save |
+| `getPokedexStatus()` | the `PokedexStatus` in this save |
+| `getParty()` | the `Party` in this save |
+
+### `Trainer`
+
+The player's name and gym badges.
+
+| Method | Returns |
+|---|---|
+| `getName()` | the trainer's name |
+| `hasBadge(Badge badge)` | `true` if the trainer has that badge |
+| `getBadges()` | a `Set<Badge>` of all earned badges, empty if none |
+
+### `Badge`
+
+An enum of the eight gym badges, in the order they are stored in the save:
+`BOULDER`, `CASCADE`, `THUNDER`, `RAINBOW`, `SOUL`, `MARSH`, `VOLCANO`, `EARTH`.
+
+### `PokedexStatus`
+
+Which Pokémon the player has seen and caught. Pokédex numbers are 1 to 151; other numbers throw
+`IllegalArgumentException`.
+
+| Method | Returns |
+|---|---|
+| `hasSeen(int dexNumber)` | `true` if that Pokémon has been seen (or caught) |
+| `hasCaught(int dexNumber)` | `true` if that Pokémon has been caught |
+| `getSeenCount()` | the "SEEN" number from the in-game Pokédex |
+| `getCaughtCount()` | the "OWN" number from the in-game Pokédex |
+| `getSeenSpecies()` | a `Set<Integer>` of seen Pokédex numbers, caught ones included |
+| `getCaughtSpecies()` | a `Set<Integer>` of caught Pokédex numbers |
+
+### `Party`
+
+The Pokémon the player is carrying.
+
+| Method | Returns |
+|---|---|
+| `getPokemon()` | a `List<PartyPokemon>` in party order (up to six), empty if the party is empty |
+
+### `PartyPokemon`
+
+One Pokémon in the party. All methods take no arguments.
+
+| Methods | Returns |
+|---|---|
+| `getNickname()` | the nickname as normal text |
+| `getLevel()` | the level, 1 to 100 |
+| `getExperience()` | the experience points |
+| `getCurrentHp()`, `getMaxHp()` | current HP (0 if fainted) and max HP |
+| `getAttack()`, `getDefense()`, `getSpeed()`, `getSpecial()` | the stats |
+| `getHpEv()`, `getAttackEv()`, `getDefenseEv()`, `getSpeedEv()`, `getSpecialEv()` | the EVs, 0 to 65535 |
+| `getAttackIv()`, `getDefenseIv()`, `getSpeedIv()`, `getSpecialIv()` | the IVs, 0 to 15 |
+| `getOriginalTrainerId()` | the original trainer's ID, 0 to 65535 |
+
+### `InvalidSaveFileException`
+
+A checked exception thrown by `new SaveFile(...)` when the data is not a valid save. The message
+(`getMessage()`) says what is wrong.
+
+## Test app
+
+`app/` is a small console program that shows the module in use. It is not a part of the module.
 
 ```bash
-./gradlew build
+./gradlew run --args="savechecker/src/test/resources/saves/Yellow/Yellow_Randomizer_02.srm"
 ```
 
-### Running Tests
+Windows users can use `gradlew.bat run --args="..."`.
+
+Example output:
+
+```text
+Trainername :YELLOW
+You have 0 badges
+You have these badges: []
+You have seen 8 / 151 Pokemons
+You have caught 1 / 151 Pokemons
+Party: 1 Pokemon
+METAPOD Level 6 HP: 18/22
+```
+
+## Running the tests
 
 ```bash
 ./gradlew test
-```
-
-A human-readable test summary is printed to the console after each run and saved to
-`app/build/reports/test-summary.log`.
-
-### Code Quality
-
-Run Checkstyle and PMD with the aggregated summary:
-
-```bash
-./gradlew checkstyleMain pmdMain printCodeQualitySummary
-```
-
-Or run everything — tests and code quality — in one go:
-
-```bash
 ./gradlew check
 ```
 
-The build fails if any blocker violations (Checkstyle/PMD priority 1–3) or test failures are
-found. HTML reports are generated at `app/build/reports/checkstyle/main.html` and
-`app/build/reports/pmd/main.html`.
+`test` runs 93 unit tests, `check` runs the tests, Checkstyle and PMD.
 
-### Cleaning
+The tests are in `savechecker/src/test/`.
 
-```bash
-./gradlew clean
-```
+## Versioning
 
----
+Version 1.0.0, semantic versioning.
 
-## Using with Visual Studio Code
+## Contributing & bug reports
 
-### Debug Configuration
+If you found a bug, feel free to open an issue on GitHub and submit your save file.
+Contributions are welcome: make a pull request, and run `./gradlew check` before opening it.
 
-This template includes one debug configuration: **Gradle: Debug Application**. Set a breakpoint
-and press F5, or open the Run and Debug panel (Ctrl+Shift+D) and click start.
+## License
 
-### Available Tasks
-
-Quick access to Gradle tasks through the VS Code Tasks panel (Ctrl+Shift+P → "Tasks: Run Task"):
-
-| Task | Description |
-| ---- | ----------- |
-| `Gradle: run` | Run application |
-| `Gradle: run (debug)` | Run with debug agent on port 5005 |
-| `Gradle: build` | Build project |
-| `Gradle: clean` | Clean build directory |
-| `Gradle: check` | Tests + code quality |
-| `Gradle: test` | Run all tests |
-| `Gradle: code quality summary` | Checkstyle + PMD + summary |
-
----
-
-## 📁 Project Structure
-
-```text
-├── app/                                 # Main application module
-│   ├── src/
-│   │   ├── main/java/se/lnu/cli/        # Production code
-│   │   │   └── App.java
-│   │   └── test/java/se/lnu/cli/        # Unit tests, colocated with the code they cover
-│   │       └── AppTest.java
-│   └── build.gradle                     # App-specific build configuration
-├── build-logic/                         # Custom Gradle convention plugins
-├── config/                              # Checkstyle and PMD rule sets
-├── gradle/                              # Gradle wrapper and version catalog
-├── test/                                # Integration and system tests (higher-level / E2E flows)
-├── settings.gradle                      # Multi-project configuration
-├── gradle.properties                    # Gradle performance settings
-└── LICENSE                              # Unlicense (Public Domain dedication)
-```
-
----
-
-## ⚖️ License
-
-This project is released into the public domain under the **Unlicense**. You are free to copy,
-modify, publish, and distribute this boilerplate code in any way you see fit without any
-restrictions.
+This project is released under the Unlicense (public domain). See `LICENSE`.
