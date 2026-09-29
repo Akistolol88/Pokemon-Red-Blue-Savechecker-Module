@@ -8,7 +8,7 @@
 
 I used 93 JUnit 5 tests, using 4 real Pokemon generation 1 savefiles (1 Red, 3 Yellow). All 3 games savefiles follow the same offsets. No Blue save was tested.
 
-I also did 3 manual tests because `/app` doesn't have automated tests. I useda Red save file and a Yellow Save file and one using a different file not being a savefile. I did manual tests because a person has to judge wether the output and erro messages makes sense.
+I also did 3 manual tests because `/app` doesn't have automated tests. I used a Red save file and a Yellow Save file and one using a different file not being a savefile. I did manual tests because a person has to judge if the output and error messages makes sense.
 
 The reason I chose to use save files is because they contain real data from a real play-through, so tests check against such values you can confirm in game, such as names, levels, badges, experience. 
 
@@ -30,8 +30,7 @@ PMD warnings.
 | --- | --- | --- |
 | The test app reads a valid Red save. | Manual test: `./gradlew run --args="'savechecker/src/test/resources/saves/Red/Pokemon Red (UE) [S][!].sav'"` and compared the output with the values the unit tests check. | ✅ Passed. Trainer `A`, 0 badges, 7 seen / 5 caught, party EEVEE Lv 20 (56/56 HP) and SQUIRTLE Lv 6 (20/22 HP). |
 | The test app reads a valid Yellow save from a randomizer (random Pokémon, 3 badges). | Manual test: `./gradlew run --args="savechecker/src/test/resources/saves/Yellow/Yellow_Randomizer_01.srm"`. | ✅ Passed. Trainer `A`, badges BOULDER, CASCADE, THUNDER, 76 seen / 5 caught, party of 5 (EXEGGUTOR Lv 30, PSYDUCK Lv 8, WEEDLE Lv 6, VENOMOTH Lv 5, STARYU Lv 10). |
-| A file that is not a save is rejected with a readable message. | Manual test: ran the test app with a 2,139-byte JPG image instead of a save. | ✅ Passed. Printed "Expected 32768 bytes but got 2139 bytes" and stopped without crashing. |
-| A path that does not exist is handled. | Manual test: ran the test app with the path `Red/Pokemon` (a mistyped path). | ✅ Passed. Printed "Could not load save: Red/Pokemon" and stopped without crashing. |
+| A file that is not a save is rejected with a readable message. | Manual test: ran the test app with a 2,139-byte JPG image instead of a save. The image is not in the repo; any file that is not a save works the same way, for example `./gradlew run --args="README.md"`. | ✅ Passed. Printed "Expected 32768 bytes but got 2139 bytes" and stopped without crashing. |
 
 ### Automated tests (JUnit 5)
 
