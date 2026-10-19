@@ -3,6 +3,7 @@ package se.lnu.savechecker;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.EnumSet;
@@ -32,6 +33,25 @@ class TrainerTest {
     @Test
     void readsRandomizerTrainerName() throws Exception {
         assertEquals("A", loadTrainer(RANDOMIZER_SAVE).getName());
+    }
+
+    @Test
+    void readsRedTrainerId() throws Exception {
+        assertEquals(48035, loadTrainer(RED_SAVE).getId());
+    }
+
+    @Test
+    void readsYellowTrainerId() throws Exception {
+        assertEquals(27315, loadTrainer(YELLOW_SAVE).getId());
+    }
+
+    @Test
+    void idMatchesOriginalTrainerOfCaughtPokemonOnly() throws Exception {
+        // In the Red save, slot 1 was caught by the player and slot 0 was traded in.
+        SaveFile save = new SaveFile(SaveFixtures.load(RED_SAVE));
+        int trainerId = save.getTrainer().getId();
+        assertEquals(trainerId, save.getParty().getPokemon().get(1).getOriginalTrainerId());
+        assertNotEquals(trainerId, save.getParty().getPokemon().get(0).getOriginalTrainerId());
     }
 
     @Test

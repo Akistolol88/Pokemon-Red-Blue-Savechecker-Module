@@ -6,8 +6,8 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * The player's trainer info from a save file: their name and which gym badges
- * they have earned.
+ * The player's trainer info from a save file: their name, their trainer ID and
+ * which gym badges they have earned.
  *
  * <p>You don't create a {@code Trainer} yourself. Get one from
  * {@link SaveFile#getTrainer()} instead.
@@ -20,14 +20,20 @@ public final class Trainer {
     /** Position where the player's name starts in the save file. */
     private static final int NAME_OFFSET = 0x2598;
 
+    /** Position where the player's trainer ID starts (2 bytes). */
+    private static final int ID_OFFSET = 0x2605;
+
     /** The badges this trainer has earned. */
     private final Set<Badge> badges;
 
     /** The trainer's name, decoded into normal text. */
     private final String name;
 
+    /** The trainer's ID number, shown on the trainer card. */
+    private final int id;
+
     /**
-     * Reads the trainer's name and badges from a save file's raw bytes.
+     * Reads the trainer's name, ID and badges from a save file's raw bytes.
      *
      * <p>Each badge is one bit in the badge byte, and a badge's
      * {@link Badge#ordinal()} is its bit number: bit on means earned.
@@ -37,6 +43,7 @@ public final class Trainer {
      */
     Trainer(ByteReader reader) {
         this.name = new TextDecoder(reader).decode(NAME_OFFSET, TextDecoder.NAME_MAX_BYTES);
+        this.id = reader.readTwoBytes(ID_OFFSET);
         this.badges = EnumSet.noneOf(Badge.class);
         for (Badge badge : Badge.values()) {
             if (reader.isBitSet(BADGE_OFFSET, badge.ordinal())) {
@@ -74,6 +81,18 @@ public final class Trainer {
      */
     public String getName() {
         return this.name;
+    }
+
+    /**
+     * Returns the trainer's ID number, as shown on the in-game trainer card.
+     * Every Pokémon the player catches gets this ID as its original trainer
+     * ID, so a party Pokémon whose {@link PartyPokemon#getOriginalTrainerId()}
+     * is different was traded from another game.
+     *
+     * @return the trainer's ID, 0 to 65535
+     */
+    public int getId() {
+        return this.id;
     }
 
 }

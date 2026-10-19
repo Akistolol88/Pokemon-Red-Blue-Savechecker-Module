@@ -37,8 +37,8 @@ public final class SaveFile {
     }
 
     /** 
-     * Returns the trainer info stored in this save: the player's name and
-     * which gym badges they have earned.
+     * Returns the trainer info stored in this save: the player's name, trainer
+     * ID and which gym badges they have earned.
      *
      * @return the trainer from this save
      */
