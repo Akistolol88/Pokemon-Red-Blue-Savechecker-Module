@@ -20,13 +20,6 @@ public final class Trainer {
     /** Position where the player's name starts in the save file. */
     private static final int NAME_OFFSET = 0x2598;
 
-    /**
-     * How many bytes the save reserves for the name. This is the size of the
-     * storage, not the longest possible name: in-game names are at most 7
-     * characters, and the rest is the end marker plus leftover bytes.
-     */
-    private static final int NAME_MAX_BYTES = 11;
-
     /** The badges this trainer has earned. */
     private final Set<Badge> badges;
 
@@ -43,7 +36,7 @@ public final class Trainer {
      *     {@link SaveFileValidator}
      */
     Trainer(ByteReader reader) {
-        this.name = new TextDecoder(reader).decode(NAME_OFFSET, NAME_MAX_BYTES);
+        this.name = new TextDecoder(reader).decode(NAME_OFFSET, TextDecoder.NAME_MAX_BYTES);
         this.badges = EnumSet.noneOf(Badge.class);
         for (Badge badge : Badge.values()) {
             if (reader.isBitSet(BADGE_OFFSET, badge.ordinal())) {

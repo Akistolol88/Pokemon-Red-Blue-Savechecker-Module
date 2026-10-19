@@ -20,6 +20,13 @@ class TextDecoder {
     /** Byte that marks the end of a name. Everything after it is ignored. */
     private static final int NAME_TEXT_END = 0x50;
 
+    /**
+     * How many bytes the save reserves for every name (player and Pokémon
+     * nicknames). This is the size of the storage, not the longest possible
+     * name: the rest is the end marker plus leftover bytes.
+     */
+    static final int NAME_MAX_BYTES = 11;
+
     /** Byte for the letter 'A'. */
     private static final int FIRST_UPPERCASE = 0x80;
     /** Byte for the letter 'Z'. */

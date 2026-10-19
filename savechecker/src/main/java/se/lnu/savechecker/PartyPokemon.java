@@ -25,9 +25,6 @@ public final class PartyPokemon {
      */
     private static final int NICKNAME_OFFSET = 0x307E;
 
-    /** How many bytes the save reserves for each nickname. */
-    private static final int NAME_MAX_BYTES = 11;
-
     /** The lowest level a Pokémon can have. */
     private static final int MIN_LEVEL = 1;
 
@@ -153,9 +150,9 @@ public final class PartyPokemon {
      */
     PartyPokemon(ByteReader reader, int slot) throws InvalidSaveFileException {
         int start = PARTY_DATA_OFFSET + (slot * POKEMON_SIZE_BYTES);
-        int nicknameStart = NICKNAME_OFFSET + (slot * NAME_MAX_BYTES);
+        int nicknameStart = NICKNAME_OFFSET + (slot * TextDecoder.NAME_MAX_BYTES);
 
-        this.nickname = new TextDecoder(reader).decode(nicknameStart, NAME_MAX_BYTES);
+        this.nickname = new TextDecoder(reader).decode(nicknameStart, TextDecoder.NAME_MAX_BYTES);
         this.currentHp = reader.readTwoBytes(start + CURRENT_HP_OFFSET);
         this.originalTrainerId = reader.readTwoBytes(start + OT_ID_OFFSET);
         this.experience = reader.readThreeBytes(start + EXPERIENCE_OFFSET);
