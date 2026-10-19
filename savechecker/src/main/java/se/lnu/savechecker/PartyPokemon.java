@@ -156,7 +156,7 @@ public final class PartyPokemon {
         int nicknameStart = NICKNAME_OFFSET + (slot * NAME_MAX_BYTES);
         ByteReader reader = new ByteReader(data);
 
-        this.nickname = new TextDecoder(data).decode(nicknameStart, NAME_MAX_BYTES);
+        this.nickname = new TextDecoder(reader).decode(nicknameStart, NAME_MAX_BYTES);
         this.currentHp = reader.readTwoBytes(start + CURRENT_HP_OFFSET);
         this.originalTrainerId = reader.readTwoBytes(start + OT_ID_OFFSET);
         this.experience = reader.readThreeBytes(start + EXPERIENCE_OFFSET);

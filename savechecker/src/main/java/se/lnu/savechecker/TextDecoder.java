@@ -38,10 +38,10 @@ class TextDecoder {
     /**
      * Creates a decoder for text stored in one save file.
      *
-     * @param data the full save file
+     * @param reader reads the bytes of the save file the text comes from
      */
-    TextDecoder(byte[] data) {
-        this.reader = new ByteReader(data);
+    TextDecoder(ByteReader reader) {
+        this.reader = reader;
     }
 
     /**

@@ -42,9 +42,8 @@ public final class Trainer {
      * @param data the full save file, already checked by {@link SaveFileValidator}
      */
     Trainer(byte[] data) {
-        this.name = new TextDecoder(data).decode(NAME_OFFSET, NAME_MAX_BYTES);
         ByteReader reader = new ByteReader(data);
-
+        this.name = new TextDecoder(reader).decode(NAME_OFFSET, NAME_MAX_BYTES);
         this.badges = EnumSet.noneOf(Badge.class);
         for (Badge badge : Badge.values()) {
             if (reader.isBitSet(BADGE_OFFSET, badge.ordinal())) {
