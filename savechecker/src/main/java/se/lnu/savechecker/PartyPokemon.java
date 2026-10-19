@@ -57,7 +57,8 @@ public final class PartyPokemon {
 
     /**
      * Where the IVs are. All four fit in 2 bytes, one half-byte each: Attack
-     * and Defense in the first byte, Speed and Special in the second.
+     * and Defense in the first byte, Speed and Special in the second. The HP
+     * IV is not stored at all, see {@link #getHpIv()}.
      */
     private static final int IV_OFFSET = 27;
 
@@ -296,6 +297,26 @@ public final class PartyPokemon {
      */
     public int getSpecialIv() {
         return this.specialIv;
+    }
+
+    /**
+     * Returns the HP IV (individual value). The save file does not store it:
+     * the game builds it from the other four IVs, the same way this method
+     * does.
+     *
+     * <p>Each of the other IVs adds a fixed amount if it is odd and nothing if
+     * it is even: Attack adds 8, Defense 4, Speed 2 and Special 1. For example
+     * Attack 9, Defense 6, Speed 15 and Special 4 give 8 + 0 + 2 + 0 = 10.
+     * In bits, the HP IV is the lowest bit of each IV put side by side.
+     *
+     * @return the HP IV, 0 to 15
+     */
+    public int getHpIv() {
+        // "% 2" is 1 for an odd IV and 0 for an even one.
+        return (this.attackIv % 2) * 8
+                + (this.defenseIv % 2) * 4
+                + (this.speedIv % 2) * 2
+                + (this.specialIv % 2) * 1;
     }
 
     /**

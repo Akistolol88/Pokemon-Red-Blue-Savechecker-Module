@@ -23,6 +23,7 @@ class PartyTest {
     private static final int FIRST_POKEMON_CURRENT_HP_OFFSET = FIRST_POKEMON_START + 1;
     private static final int FIRST_POKEMON_EXPERIENCE_OFFSET = FIRST_POKEMON_START + 14;
     private static final int FIRST_POKEMON_LEVEL_OFFSET = FIRST_POKEMON_START + 33;
+    private static final int FIRST_POKEMON_IV_OFFSET = FIRST_POKEMON_START + 27;
 
     private static Party loadParty(String resourcePath) throws Exception {
         return new SaveFile(SaveFixtures.load(resourcePath)).getParty();
@@ -67,6 +68,51 @@ class PartyTest {
         assertEquals(27, eevee.getDefense());
         assertEquals(27, eevee.getSpeed());
         assertEquals(35, eevee.getSpecial());
+    }
+
+    @Test
+    void readsRedFirstPokemonIvs() throws Exception {
+        // IV bytes 0x75, 0x2C: Attack 7, Defense 5 in the first byte, Speed 2, Special 12 in the second.
+        PartyPokemon eevee = loadParty(RED_SAVE).getPokemon().get(0);
+        assertEquals(7, eevee.getAttackIv());
+        assertEquals(5, eevee.getDefenseIv());
+        assertEquals(2, eevee.getSpeedIv());
+        assertEquals(12, eevee.getSpecialIv());
+    }
+
+    @Test
+    void buildsHpIvFromOtherIvs() throws Exception {
+        // Attack 7 and Defense 5 are odd (8 + 4), Speed 2 and Special 12 are even: 12.
+        // Checked against the game's max HP formula: base HP 55, level 20, HP IV 12 gives 56 HP.
+        assertEquals(12, loadParty(RED_SAVE).getPokemon().get(0).getHpIv());
+    }
+
+    @Test
+    void readsHighestHpIvWhenAllIvsAreOdd() throws Exception {
+        // Edge case: IVs 5, 1, 13 and 3 are all odd, so every bit is on: 8 + 4 + 2 + 1 = 15.
+        assertEquals(15, loadParty(YELLOW_SAVE).getPokemon().get(1).getHpIv());
+    }
+
+    @Test
+    void readsLowestHpIvWhenAllIvsAreEven() throws Exception {
+        // Edge case: IVs 2, 4, 6 and 8 are all even, so no bit is on.
+        byte[] data = SaveFixtures.load(RED_SAVE);
+        data[FIRST_POKEMON_IV_OFFSET] = 0x24;
+        data[FIRST_POKEMON_IV_OFFSET + 1] = 0x68;
+        assertEquals(0, new Party(new ByteReader(data)).getPokemon().get(0).getHpIv());
+    }
+
+    @Test
+    void givesEachIvItsOwnHpIvBit() throws Exception {
+        // Only one odd IV at a time, so a mixed-up order (for example Attack worth 1) is caught.
+        byte[] data = SaveFixtures.load(RED_SAVE);
+        data[FIRST_POKEMON_IV_OFFSET] = 0x12;
+        data[FIRST_POKEMON_IV_OFFSET + 1] = 0x22;
+        assertEquals(8, new Party(new ByteReader(data)).getPokemon().get(0).getHpIv());
+
+        data[FIRST_POKEMON_IV_OFFSET] = 0x22;
+        data[FIRST_POKEMON_IV_OFFSET + 1] = 0x23;
+        assertEquals(1, new Party(new ByteReader(data)).getPokemon().get(0).getHpIv());
     }
 
     @Test
