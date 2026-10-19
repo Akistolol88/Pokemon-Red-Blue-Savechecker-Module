@@ -14,9 +14,6 @@ package se.lnu.savechecker;
  */
 class TextDecoder {
 
-    /** Reads the bytes of the save file the text comes from. */
-    private final ByteReader reader;
-
     /** Byte that marks the end of a name. Everything after it is ignored. */
     private static final int NAME_TEXT_END = 0x50;
 
@@ -42,6 +39,9 @@ class TextDecoder {
     /** Byte for a space. */
     private static final int SPACE = 0x7F;
 
+    /** Reads the bytes of the save file the text comes from. */
+    private final ByteReader reader;
+    
     /**
      * Creates a decoder for text stored in one save file.
      *

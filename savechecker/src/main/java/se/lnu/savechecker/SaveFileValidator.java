@@ -33,10 +33,11 @@ class SaveFileValidator {
         }
         if (data.length != EXPECTED_SAVE_SIZE_BYTES) {
             throw new InvalidSaveFileException("Expected " + EXPECTED_SAVE_SIZE_BYTES
-                + " bytes but got " + data.length + " bytes. \nNot a valid Pokemon Generation 1 savefile.");
+                    + " bytes but got " + data.length + " bytes");
         }
         if (!this.checkSumValidator.isValid(data)) {
-            throw new InvalidSaveFileException("Checksum does not match");
+            throw new InvalidSaveFileException(
+                    "Checksum does not match, so the file is corrupted or not a Generation 1 save");
         }
     }
 }

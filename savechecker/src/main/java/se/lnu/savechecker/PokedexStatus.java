@@ -16,6 +16,9 @@ import java.util.Set;
  * {@link SaveFile#getPokedexStatus()} instead.
  */
 public final class PokedexStatus {
+    /** The lowest Pokédex number in Generation I (Bulbasaur). */
+    private static final int FIRST_POKEDEX_ENTRY = 1;
+
     /** The highest Pokédex number in Generation I (Mew). */
     private static final int LAST_POKEDEX_ENTRY = 151;
 
@@ -115,9 +118,9 @@ public final class PokedexStatus {
      * @throws IllegalArgumentException if {@code dexNumber} is not 1 to 151
      */
     private void checkDexNumber(int dexNumber) {
-        if (dexNumber < 1 || dexNumber > LAST_POKEDEX_ENTRY) {
-            throw new IllegalArgumentException("Pokédex number must be 1 to "
-                    + LAST_POKEDEX_ENTRY + " but was " + dexNumber);
+        if (dexNumber < FIRST_POKEDEX_ENTRY || dexNumber > LAST_POKEDEX_ENTRY) {
+            throw new IllegalArgumentException("Pokedex number must be " + FIRST_POKEDEX_ENTRY
+                    + " to " + LAST_POKEDEX_ENTRY + " but was " + dexNumber);
         }
     }
 
@@ -136,7 +139,7 @@ public final class PokedexStatus {
      */
     private Set<Integer> readDexFlags(ByteReader reader, int offset) {
         Set<Integer> dexFlags = new HashSet<>();
-        for (int dexNumber = 1; dexNumber <= LAST_POKEDEX_ENTRY; dexNumber++) {
+        for (int dexNumber = FIRST_POKEDEX_ENTRY; dexNumber <= LAST_POKEDEX_ENTRY; dexNumber++) {
             int byteIndex = ((dexNumber - 1) / BITS_PER_BYTE);
             int bitIndex = ((dexNumber - 1) % BITS_PER_BYTE);
             if (reader.isBitSet(offset + byteIndex, bitIndex)) {

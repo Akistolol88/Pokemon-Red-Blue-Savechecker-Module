@@ -28,7 +28,7 @@ class CheckSumValidator {
      * Byte position where the calculated checksum is stored in the file -
      * exactly one byte after {@link #CHECKSUM_RANGE_END}.
      */
-    private static final int CHECKSUM_BYTE_OFFSET = 0x3523;
+    private static final int CHECKSUM_BYTE_OFFSET = CHECKSUM_RANGE_END + 1;
 
     /**
      * Checks whether the save file's stored checksum matches one recomputed
