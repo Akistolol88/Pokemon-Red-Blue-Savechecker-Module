@@ -7,7 +7,7 @@ plugins {
 }
 
 group = 'se.lnu.savechecker'
-version = '1.0.0'
+version = '1.1.0'
 
 dependencies {
     testImplementation libs.junit.jupiter.api

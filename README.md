@@ -7,16 +7,17 @@ files in their own programs. You pass the raw bytes of a `.sav` file to `SaveFil
 that the file is valid and gives you:
 
 - **Checksum check:** rejects files that are the wrong size or whose checksum does not match.
-- **Trainer:** the trainer name and which of the 8 gym badges have been earned.
+- **Trainer:** the trainer name, trainer ID and which of the 8 gym badges have been earned.
 - **Pokédex:** which Pokémon have been seen and caught, as counts or per Pokédex number.
 - **Party:** up to six Pokémon, each with nickname, level, experience, current and max HP, stats,
-  EVs, IVs and original trainer ID.
+  EVs, IVs (including the HP IV) and original trainer ID.
 
 ## What it doesn't do
 
 - It only reads saves. It cannot edit or write them.
 - It does not read PC boxes, items or money.
-- It does not read Pokémon moves, species, types or HP IV.
+- It does not read Pokémon moves, species or types. A Pokémon without a nickname shows its species
+  name through `getNickname()`, but a nicknamed one does not.
 - The checksum cannot detect changes that cancel each other out (for example one byte going up by
   1 and another going down by 1).
 - Text characters it does not recognise are shown as `?`.
@@ -99,11 +100,12 @@ Reads and validates the raw bytes of a save file.
 
 ### `Trainer`
 
-The player's name and gym badges.
+The player's name, trainer ID and gym badges.
 
 | Method | Returns |
 |---|---|
 | `getName()` | the trainer's name |
+| `getId()` | the trainer ID from the trainer card, 0 to 65535 (since 1.1.0) |
 | `hasBadge(Badge badge)` | `true` if the trainer has that badge |
 | `getBadges()` | a `Set<Badge>` of all earned badges, empty if none |
 
@@ -147,12 +149,16 @@ One Pokémon in the party. All methods take no arguments.
 | `getAttack()`, `getDefense()`, `getSpeed()`, `getSpecial()` | the stats |
 | `getHpEv()`, `getAttackEv()`, `getDefenseEv()`, `getSpeedEv()`, `getSpecialEv()` | the EVs, 0 to 65535 |
 | `getAttackIv()`, `getDefenseIv()`, `getSpeedIv()`, `getSpecialIv()` | the IVs, 0 to 15 |
-| `getOriginalTrainerId()` | the original trainer's ID, 0 to 65535 |
+| `getHpIv()` | the HP IV, 0 to 15. Not stored in the save: built from the other four IVs the same way the game does (since 1.1.0) |
+| `getOriginalTrainerId()` | the original trainer's ID, 0 to 65535. If it is not the same as `Trainer.getId()`, the Pokémon was traded |
 
 ### `InvalidSaveFileException`
 
 A checked exception thrown by `new SaveFile(...)` when the data is not a valid save. The message
-(`getMessage()`) says what is wrong.
+(`getMessage()`) says what is wrong, as one line of plain text without line breaks, so you can put
+your own text in front of it (for example `"Not a valid save file: " + e.getMessage()`). Show the
+message to the user, but don't compare it with fixed text in your code: the wording can change
+between versions.
 
 ## Test app
 
@@ -183,13 +189,29 @@ METAPOD Level 6 HP: 18/22
 ./gradlew check
 ```
 
-`test` runs 93 unit tests, `check` runs the tests, Checkstyle and PMD.
+`test` runs 101 unit tests, `check` runs the tests, Checkstyle and PMD.
 
 The tests are in `savechecker/src/test/`.
 
 ## Versioning
 
-Version 1.0.0, semantic versioning.
+Version 1.1.0, semantic versioning. 1.1.0 only adds things, so code written for 1.0.0 still
+works without changes.
+
+## Changelog
+
+### 1.1.0
+
+- Added `Trainer.getId()`.
+- Added `PartyPokemon.getHpIv()`.
+- Exception messages are clearer and no longer contain line breaks. The checksum message now says
+  what a mismatch means (a corrupted file or not a Generation 1 save).
+- Internal clean-up, no change for users: the save data is wrapped in one shared reader, and the
+  checksum code reads bytes the same way as the rest of the module.
+
+### 1.0.0
+
+- First release (tag `laboration-2`).
 
 ## Contributing & bug reports
 
