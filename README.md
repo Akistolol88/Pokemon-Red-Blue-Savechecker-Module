@@ -208,6 +208,7 @@ works without changes.
   what a mismatch means (a corrupted file or not a Generation 1 save).
 - Internal clean-up, no change for users: the save data is wrapped in one shared reader, and the
   checksum code reads bytes the same way as the rest of the module.
+- Nothing is deprecated or removed in this version.
 
 ### 1.0.0
 
