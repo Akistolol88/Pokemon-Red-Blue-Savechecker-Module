@@ -146,15 +146,14 @@ public final class PartyPokemon {
      * Pokémon's position plus 44 for every slot before it. The nickname is
      * found the same way, but in the nickname list with 11 bytes per slot.
      *
-     * @param data the full save file as raw bytes
+     * @param reader reads the bytes of the save file
      * @param slot which party slot to read, 0 for the first Pokémon
      * @throws InvalidSaveFileException if the level or HP values are
      *     impossible, see {@link #checkValues(int)}
      */
-    PartyPokemon(byte[] data, int slot) throws InvalidSaveFileException {
+    PartyPokemon(ByteReader reader, int slot) throws InvalidSaveFileException {
         int start = PARTY_DATA_OFFSET + (slot * POKEMON_SIZE_BYTES);
         int nicknameStart = NICKNAME_OFFSET + (slot * NAME_MAX_BYTES);
-        ByteReader reader = new ByteReader(data);
 
         this.nickname = new TextDecoder(reader).decode(nicknameStart, NAME_MAX_BYTES);
         this.currentHp = reader.readTwoBytes(start + CURRENT_HP_OFFSET);

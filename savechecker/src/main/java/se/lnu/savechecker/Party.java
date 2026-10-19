@@ -25,13 +25,13 @@ public final class Party {
      * Reads the party size, then reads one {@link PartyPokemon} for each slot
      * that is in use.
      *
-     * @param data the full save file as raw bytes, already checked by
+     * @param reader reads the bytes of the save file, already checked by
      *     {@link SaveFileValidator}
      * @throws InvalidSaveFileException if the save says the party has more
      *     than six Pokémon, or if one of the Pokémon has impossible values
      */
-    Party(byte[] data) throws InvalidSaveFileException {
-        int partyCount = new ByteReader(data).readByte(PARTY_COUNT_OFFSET);
+    Party(ByteReader reader) throws InvalidSaveFileException {
+        int partyCount = reader.readByte(PARTY_COUNT_OFFSET);
         if (partyCount > MAX_PARTY_SIZE) {
             throw new InvalidSaveFileException("Party can hold at most " + MAX_PARTY_SIZE
                     + " Pokemon but the save says " + partyCount);
@@ -39,7 +39,7 @@ public final class Party {
         this.pokemon = new ArrayList<>();
 
         for (int slot = 0; slot < partyCount; slot++) {
-            this.pokemon.add(new PartyPokemon(data, slot));
+            this.pokemon.add(new PartyPokemon(reader, slot));
         }
     }
 

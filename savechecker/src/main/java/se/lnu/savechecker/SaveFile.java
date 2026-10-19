@@ -29,13 +29,14 @@ public final class SaveFile {
      */
     public SaveFile(byte[] data) throws InvalidSaveFileException {
         new SaveFileValidator().validate(data);
+        ByteReader reader = new ByteReader(data);
 
-        this.trainer = new Trainer(data);
-        this.pokedexStatus = new PokedexStatus(data);
-        this.party = new Party(data);
+        this.trainer = new Trainer(reader);
+        this.pokedexStatus = new PokedexStatus(reader);
+        this.party = new Party(reader);
     }
 
-    /**
+    /** 
      * Returns the trainer info stored in this save: the player's name and
      * which gym badges they have earned.
      *

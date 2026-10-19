@@ -37,10 +37,10 @@ public final class PokedexStatus {
     /**
      * Reads both Pokédex lists from a save file's raw bytes.
      *
-     * @param data the full save file, already checked by {@link SaveFileValidator}
+     * @param reader reads the bytes of the save file, already checked by
+     *     {@link SaveFileValidator}
      */
-    PokedexStatus(byte[] data) {
-        ByteReader reader = new ByteReader(data);
+    PokedexStatus(ByteReader reader) {
         this.caughtPokemon = readDexFlags(reader, POKEDEX_CAUGHT_OFFSET);
         this.seenPokemon = readDexFlags(reader, POKEDEX_SEEN_OFFSET);
     }

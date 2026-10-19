@@ -39,10 +39,10 @@ public final class Trainer {
      * <p>Each badge is one bit in the badge byte, and a badge's
      * {@link Badge#ordinal()} is its bit number: bit on means earned.
      *
-     * @param data the full save file, already checked by {@link SaveFileValidator}
+     * @param reader reads the bytes of the save file, already checked by
+     *     {@link SaveFileValidator}
      */
-    Trainer(byte[] data) {
-        ByteReader reader = new ByteReader(data);
+    Trainer(ByteReader reader) {
         this.name = new TextDecoder(reader).decode(NAME_OFFSET, NAME_MAX_BYTES);
         this.badges = EnumSet.noneOf(Badge.class);
         for (Badge badge : Badge.values()) {

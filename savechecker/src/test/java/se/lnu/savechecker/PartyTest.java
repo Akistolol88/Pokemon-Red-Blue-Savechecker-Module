@@ -147,7 +147,7 @@ class PartyTest {
         data[FIRST_POKEMON_EXPERIENCE_OFFSET] = 1;
         data[FIRST_POKEMON_EXPERIENCE_OFFSET + 1] = 0;
         data[FIRST_POKEMON_EXPERIENCE_OFFSET + 2] = 5;
-        assertEquals(65541, new Party(data).getPokemon().get(0).getExperience());
+        assertEquals(65541, new Party(new ByteReader(data)).getPokemon().get(0).getExperience());
     }
 
     @Test
@@ -201,14 +201,14 @@ class PartyTest {
     void readsEmptyParty() throws Exception {
         byte[] data = SaveFixtures.load(RED_SAVE);
         data[PARTY_COUNT_OFFSET] = 0;
-        assertTrue(new Party(data).getPokemon().isEmpty());
+        assertTrue(new Party(new ByteReader(data)).getPokemon().isEmpty());
     }
 
     @Test
     void rejectsTooManyPokemon() throws Exception {
         byte[] data = SaveFixtures.load(RED_SAVE);
         data[PARTY_COUNT_OFFSET] = MAX_PARTY_SIZE + 1;
-        assertThrows(InvalidSaveFileException.class, () -> new Party(data));
+        assertThrows(InvalidSaveFileException.class, () -> new Party(new ByteReader(data)));
     }
 
     @Test
@@ -220,7 +220,7 @@ class PartyTest {
             System.arraycopy(data, FIRST_POKEMON_START, data,
                     FIRST_POKEMON_START + slot * POKEMON_SIZE_BYTES, POKEMON_SIZE_BYTES);
         }
-        assertEquals(MAX_PARTY_SIZE, new Party(data).getPokemon().size());
+        assertEquals(MAX_PARTY_SIZE, new Party(new ByteReader(data)).getPokemon().size());
     }
 
     @Test
@@ -249,23 +249,23 @@ class PartyTest {
     void rejectsLevelZero() throws Exception {
         byte[] data = SaveFixtures.load(RED_SAVE);
         data[FIRST_POKEMON_LEVEL_OFFSET] = 0;
-        assertThrows(InvalidSaveFileException.class, () -> new Party(data));
+        assertThrows(InvalidSaveFileException.class, () -> new Party(new ByteReader(data)));
     }
 
     @Test
     void rejectsLevelAbove100() throws Exception {
         byte[] data = SaveFixtures.load(RED_SAVE);
         data[FIRST_POKEMON_LEVEL_OFFSET] = 101;
-        assertThrows(InvalidSaveFileException.class, () -> new Party(data));
+        assertThrows(InvalidSaveFileException.class, () -> new Party(new ByteReader(data)));
     }
 
     @Test
     void acceptsLevelsOneAndHundred() throws Exception {
         byte[] data = SaveFixtures.load(RED_SAVE);
         data[FIRST_POKEMON_LEVEL_OFFSET] = 1;
-        assertEquals(1, new Party(data).getPokemon().get(0).getLevel());
+        assertEquals(1, new Party(new ByteReader(data)).getPokemon().get(0).getLevel());
         data[FIRST_POKEMON_LEVEL_OFFSET] = 100;
-        assertEquals(100, new Party(data).getPokemon().get(0).getLevel());
+        assertEquals(100, new Party(new ByteReader(data)).getPokemon().get(0).getLevel());
     }
 
     @Test
@@ -274,7 +274,7 @@ class PartyTest {
         byte[] data = SaveFixtures.load(RED_SAVE);
         data[FIRST_POKEMON_CURRENT_HP_OFFSET] = 0;
         data[FIRST_POKEMON_CURRENT_HP_OFFSET + 1] = 57;
-        assertThrows(InvalidSaveFileException.class, () -> new Party(data));
+        assertThrows(InvalidSaveFileException.class, () -> new Party(new ByteReader(data)));
     }
 
     @Test
@@ -282,6 +282,6 @@ class PartyTest {
         byte[] data = SaveFixtures.load(RED_SAVE);
         data[FIRST_POKEMON_CURRENT_HP_OFFSET] = 0;
         data[FIRST_POKEMON_CURRENT_HP_OFFSET + 1] = 0;
-        assertEquals(0, new Party(data).getPokemon().get(0).getCurrentHp());
+        assertEquals(0, new Party(new ByteReader(data)).getPokemon().get(0).getCurrentHp());
     }
 }
